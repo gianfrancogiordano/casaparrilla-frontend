@@ -1,0 +1,177 @@
+<!-- ═══ HEADER ═════════════════════════════════════════════════════════════ -->
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-2">
+  <div>
+    <h4 class="fw-bold text-dark mb-0">Panel de Control</h4>
+    <p class="text-muted small mb-0">{{ fechaHoy | date:"EEEE, d 'de' MMMM yyyy" }}</p>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <!-- Spinner de carga -->
+    <div *ngIf="cargando" class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+    <span class="badge rounded-pill px-3 py-2 live-badge">
+      <span class="live-dot"></span> En Vivo
+    </span>
+  </div>
+</div>
+
+<!-- ═══ SKELETON (cargando) ════════════════════════════════════════════════ -->
+<div *ngIf="cargando" class="row g-3 mb-4">
+  <div class="col-6 col-lg-3" *ngFor="let i of [1,2,3,4]">
+    <div class="card border-0 shadow-sm rounded-4 p-3">
+      <div class="skeleton skeleton-sm mb-2"></div>
+      <div class="skeleton skeleton-lg mb-1"></div>
+      <div class="skeleton skeleton-sm w-50"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MÉTRICAS ═══════════════════════════════════════════════════════════ -->
+<div *ngIf="data" class="row g-3 mb-4">
+
+  <!-- Ventas del Día -->
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-green">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="metric-icon">💰</span>
+          <span class="badge rounded-pill delta-badge delta-positive">Hoy</span>
+        </div>
+        <h3 class="fw-bold metric-value mb-0">{{ data.metrics.ventasHoy | currency:'USD':'symbol':'1.2-2' }}</h3>
+        <p class="text-muted small mb-0 mt-1">Ventas del Día</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Órdenes Activas -->
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-orange">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="metric-icon">🍽️</span>
+          <span class="badge rounded-pill delta-badge delta-positive">{{ data.metrics.ordenesEnCocina }} en cocina</span>
+        </div>
+        <h3 class="fw-bold metric-value mb-0">{{ data.metrics.ordenesActivas }}</h3>
+        <p class="text-muted small mb-0 mt-1">Órdenes Activas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completadas Hoy -->
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-blue">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="metric-icon">✅</span>
+          <span class="badge rounded-pill delta-badge delta-positive">pagadas</span>
+        </div>
+        <h3 class="fw-bold metric-value mb-0">{{ data.metrics.completadasHoy }}</h3>
+        <p class="text-muted small mb-0 mt-1">Completadas Hoy</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Promedio -->
+  <div class="col-6 col-lg-3">
+    <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-red">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="metric-icon">🧾</span>
+          <span class="badge rounded-pill delta-badge delta-positive">promedio</span>
+        </div>
+        <h3 class="fw-bold metric-value mb-0">{{ data.metrics.ticketPromedio | currency:'USD':'symbol':'1.2-2' }}</h3>
+        <p class="text-muted small mb-0 mt-1">Ticket Promedio</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ FILA: Órdenes recientes + Top Productos ═══════════════════════════ -->
+<div *ngIf="data" class="row g-3">
+
+  <!-- Últimas Órdenes -->
+  <div class="col-12 col-xl-7">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0">🧾 Últimas Órdenes</h6>
+        <span class="badge bg-light text-dark border rounded-pill">{{ data.recentOrders.length }}</span>
+      </div>
+      <div class="card-body p-0">
+
+        <!-- Sin órdenes -->
+        <div *ngIf="data.recentOrders.length === 0" class="text-center py-5 text-muted">
+          <p class="fs-3">📋</p>
+          <p class="small">No hay órdenes registradas aún.</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="data.recentOrders.length > 0">
+          <table class="table table-hover align-middle mb-0 orders-table">
+            <thead>
+              <tr>
+                <th class="ps-4">#Orden</th>
+                <th>Mesa</th>
+                <th class="d-none d-md-table-cell">Mesero</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th class="d-none d-md-table-cell pe-4">Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of data.recentOrders">
+                <td class="ps-4 fw-bold text-dark">{{ order.orderNumber }}</td>
+                <td class="text-muted">{{ getMesaLabel(order) }}</td>
+                <td class="text-muted d-none d-md-table-cell">{{ getMeseroLabel(order) }}</td>
+                <td class="fw-semibold">{{ order.totals.total | currency:'USD':'symbol':'1.2-2' }}</td>
+                <td>
+                  <span class="badge rounded-pill px-2 py-1 order-badge {{ estadoBadge(order.status) }}">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="text-muted d-none d-md-table-cell pe-4 small">
+                  {{ order.createdAt | date:'hh:mm a' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Productos -->
+  <div class="col-12 col-xl-5">
+    <div class="card border-0 shadow-sm rounded-4 h-100">
+      <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4">
+        <h6 class="fw-bold mb-0">🥩 Top Productos Vendidos</h6>
+      </div>
+      <div class="card-body px-4 pt-2 pb-3">
+
+        <!-- Sin datos -->
+        <div *ngIf="data.topProducts.length === 0" class="text-center py-4 text-muted">
+          <p class="fs-3">📊</p>
+          <p class="small">Sin ventas completadas aún.</p>
+        </div>
+
+        <div *ngFor="let p of data.topProducts; let i = index"
+          class="d-flex align-items-center gap-3 mb-3">
+          <span class="rank-badge rounded-circle fw-bold text-muted"
+            [class.rank-gold]="i===0"
+            [class.rank-silver]="i===1"
+            [class.rank-bronze]="i===2">
+            {{ i + 1 }}
+          </span>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="small fw-medium text-dark">{{ p.nombre }}</span>
+              <span class="small text-muted">{{ p.ventas }} vta{{ p.ventas !== 1 ? 's' : '' }}.</span>
+            </div>
+            <div class="progress rounded-pill" style="height: 5px;">
+              <div class="progress-bar top-bar" role="progressbar" [style.width.%]="p.pct"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

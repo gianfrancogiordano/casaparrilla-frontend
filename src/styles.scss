@@ -1,1 +1,85 @@
-/* You can add global styles to this file, and also import other style files */
+// ======================================================
+// Casa Parrilla - Sistema de Diseño Global
+// @use debe ser la PRIMERA instrucción del archivo
+// ======================================================
+
+// Bootstrap con variables PERSONALIZADAS de Casa Parrilla
+@use "bootstrap/scss/bootstrap" with (
+  $font-family-base: 'Inter, sans-serif',
+  $primary:          #d32f2f,
+  $secondary:        #ff9800,
+  $dark:             #212121,
+  $light:            #f5f5f5,
+  $border-radius:    0.5rem,
+  $border-radius-lg: 1rem,
+  $box-shadow:       0 0.5rem 1rem rgba(#212121, 0.15),
+  $box-shadow-sm:    0 0.125rem 0.25rem rgba(#212121, 0.075),
+);
+
+// ======================================================
+// Variables CSS Nativas (acceso dinámico desde TS/HTML)
+// ======================================================
+:root {
+  --cp-rojo:    #d32f2f;
+  --cp-naranja: #ff9800;
+  --cp-carbon:  #212121;
+  --cp-gris:    #424242;
+  --cp-blanco:  #f5f5f5;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--cp-blanco);
+  color: var(--cp-carbon);
+}
+
+// Botón Premium con gradiente de la marca
+.btn-premium {
+  background: linear-gradient(135deg, var(--cp-rojo) 0%, var(--cp-naranja) 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(#212121, 0.15);
+    color: white;
+  }
+}
+
+// Texto con gradiente de la marca
+.text-gradient {
+  background: linear-gradient(135deg, var(--cp-rojo) 0%, var(--cp-naranja) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// Sidebar Links con hover animado
+.custom-hover {
+  transition: all 0.2s ease-in-out;
+  border-left: 4px solid transparent;
+
+  &:hover {
+    background-color: var(--cp-blanco);
+    border-left: 4px solid var(--cp-naranja);
+    color: var(--cp-rojo) !important;
+
+    span:not(.fs-5) {
+      color: var(--cp-rojo) !important;
+    }
+  }
+}
+
+// Estado Active del Sidebar
+.active-nav-link {
+  background-color: var(--cp-blanco);
+  border-left: 4px solid var(--cp-rojo);
+  color: var(--cp-rojo) !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(#212121, 0.075);
+
+  span {
+    color: var(--cp-rojo) !important;
+  }
+}

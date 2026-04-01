@@ -1,0 +1,26 @@
+// ─── User Pill ──────────────────────────────────────────────────────────────
+.user-pill {
+  background: #f8f8f8;
+  border: 1px solid #f0f0f0;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: linear-gradient(135deg, var(--cp-rojo), var(--cp-naranja));
+  color: white;
+  font-size: 0.9rem;
+}
+
+// ─── Role Badge ─────────────────────────────────────────────────────────────
+.role-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.role-administrador { color: var(--cp-rojo); }
+.role-mesero        { color: #1976d2; }        // azul operativo
+.role-parrillero    { color: #e65100; }        // naranja fuego

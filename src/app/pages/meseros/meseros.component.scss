@@ -1,0 +1,57 @@
+.mesa-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  min-height: 160px;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.mesa-libre {
+  border-top: 4px solid #4caf50 !important;
+  background: #fff;
+}
+
+.mesa-ocupada {
+  border-top: 4px solid var(--cp-rojo) !important;
+  background: #fff8f8;
+}
+
+.mesa-icon {
+  font-size: 2.2rem;
+  transition: transform 0.2s ease;
+}
+.mesa-icon-ocupada {
+  animation: wiggle 0.5s ease;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-5deg); }
+  75%       { transform: rotate(5deg); }
+}
+
+// Badges
+.mesa-badge { font-size: 0.72rem; font-weight: 600; }
+.badge-libre    { background: rgba(#4caf50, 0.15); color: #2e7d32; }
+.badge-ocupada  { background: rgba(#d32f2f, 0.15); color: #c62828; }
+
+// Legend dots
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+
+  &.libre   { background: #4caf50; }
+  &.ocupada { background: #d32f2f; }
+}
+
+// color utility (not in Bootstrap override)
+.text-cp-rojo { color: var(--cp-rojo) !important; }

@@ -1,0 +1,276 @@
+<!-- ═══ MODAL LIBERAR MESA (sin consumo) ══════════════════════════════════ -->
+<div *ngIf="mostrarModalLiberar" class="modal-overlay" (click)="cerrarModalLiberar()">
+  <div class="modal-cobro modal-liberar rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()">
+    <div class="text-center mb-3">
+      <div class="liberar-icon">🚪</div>
+      <h5 class="fw-bold mt-2 mb-1">Liberar Mesa {{ mesaNumero }}</h5>
+      <p class="text-muted small mb-0">El comensal se fue sin consumir nada.</p>
+    </div>
+    <div class="alert alert-warning-soft rounded-3 py-2 px-3 mb-4 d-flex align-items-center gap-2">
+      <span>⚠️</span>
+      <span class="small">Esta acción cancelará la orden y dejará la mesa disponible.</span>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary rounded-3 fw-semibold flex-fill"
+        (click)="cerrarModalLiberar()" [disabled]="liberando">
+        Cancelar
+      </button>
+      <button class="btn btn-liberar rounded-3 fw-bold flex-fill"
+        (click)="confirmarLiberar()" [disabled]="liberando">
+        <span *ngIf="liberando" class="spinner-border spinner-border-sm me-2"></span>
+        {{ liberando ? 'Liberando...' : '🚪 Liberar Mesa' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL DE COBRO (overlay) ═══════════════════════════════════════════ -->
+
+<div *ngIf="mostrarModalCobro" class="modal-overlay" (click)="cerrarModalCobro()">
+  <div class="modal-cobro rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h5 class="fw-bold mb-0">💳 Cobrar Mesa {{ mesaNumero }}</h5>
+      <button class="btn btn-sm btn-link text-muted p-0" (click)="cerrarModalCobro()">✕</button>
+    </div>
+    <div class="resumen-items mb-3" *ngIf="orden">
+      <div *ngFor="let item of orden.items" class="d-flex justify-content-between py-1 border-bottom">
+        <span class="small text-dark">{{ item.quantity }}× {{ item.productName }}</span>
+        <span class="small fw-semibold">${{ item.subtotal | number:'1.2-2' }}</span>
+      </div>
+    </div>
+    <div class="totales-box rounded-3 p-3 mb-4" *ngIf="orden && config">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="text-muted small">Total USD</span>
+        <span class="fw-bold fs-5 text-cp-rojo">${{ orden.totals.total | number:'1.2-2' }}</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <span class="text-muted small">En Bolívares (BS)</span>
+        <span class="fw-semibold text-dark">Bs. {{ totalBs | number:'1.2-2' }}</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted small">En Pesos (COP)</span>
+        <span class="fw-semibold text-dark">$ {{ totalCop | number:'1.0-0' }}</span>
+      </div>
+    </div>
+    <p class="fw-semibold small mb-2">Método de pago:</p>
+    <div class="metodos-grid mb-4">
+      <button
+        *ngFor="let m of metodos"
+        class="btn btn-metodo"
+        [class.btn-metodo-active]="metodoPago === m"
+        (click)="metodoPago = m">
+        <span class="fs-4 d-block mb-1">{{ metodosIconos[m] }}</span>
+        <span class="small fw-semibold lh-sm">{{ m }}</span>
+      </button>
+    </div>
+    <button class="btn btn-premium w-100 py-3 rounded-3 fw-bold fs-6"
+      [disabled]="cobrando" (click)="confirmarCobro()">
+      <span *ngIf="cobrando" class="spinner-border spinner-border-sm me-2"></span>
+      {{ cobrando ? 'Procesando...' : '✔ Confirmar Cobro — ' + metodoPago }}
+    </button>
+  </div>
+</div>
+
+<!-- ═══ OFFCANVAS — CATÁLOGO DE PRODUCTOS (derecha) ═════════════════════════ -->
+<div class="offcanvas offcanvas-end catalogo-offcanvas"
+     tabindex="-1"
+     id="catalogoOffcanvas"
+     #catalogoOffcanvas>
+  <div class="offcanvas-header border-bottom pb-3">
+    <div class="flex-grow-1">
+      <h5 class="offcanvas-title fw-bold mb-0">🥩 Productos</h5>
+      <!-- Buscador compacto -->
+      <div class="input-group input-group-sm mt-2 rounded-3">
+        <span class="input-group-text bg-light border-end-0">🔍</span>
+        <input type="text" class="form-control bg-light border-start-0"
+          placeholder="Buscar..."
+          [(ngModel)]="busqueda"
+          (ngModelChange)="onBusqueda()">
+      </div>
+    </div>
+    <button type="button" class="btn-close ms-3" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+  </div>
+
+  <!-- Filtros de categoría -->
+  <div class="px-3 py-2 border-bottom d-flex gap-2 flex-wrap" *ngIf="categorias.length > 1">
+    <button *ngFor="let cat of categorias"
+      class="btn btn-sm rounded-pill cat-btn"
+      [class.cat-btn-active]="categoriaActiva === cat"
+      (click)="filtrarCategoria(cat)">{{ cat }}
+    </button>
+  </div>
+
+  <div class="offcanvas-body p-3">
+    <!-- Loader -->
+    <div *ngIf="cargando" class="text-center py-4">
+      <div class="spinner-border text-primary"></div>
+    </div>
+    <!-- Sin resultados -->
+    <div *ngIf="!cargando && productosFiltrados.length === 0" class="text-center py-5 text-muted">
+      <p class="fs-3">🍽️</p><p>No se encontraron productos.</p>
+    </div>
+    <!-- Lista de productos (1 columna en mobile, 2 en desktop) -->
+    <div class="row g-2" *ngIf="!cargando">
+      <div class="col-6" *ngFor="let p of productosFiltrados">
+        <div class="card border-0 rounded-3 producto-card h-100" (click)="agregarProducto(p)">
+          <div class="card-body p-2 d-flex flex-column align-items-center text-center">
+            <div class="producto-emoji mb-1">🥩</div>
+            <p class="fw-semibold mb-0 small text-dark lh-sm">{{ p.name }}</p>
+            <p *ngIf="p.category" class="text-muted mb-1" style="font-size:0.7rem;">{{ p.category }}</p>
+            <div class="d-flex align-items-center justify-content-between w-100 mt-auto">
+              <span class="badge badge-precio">${{ p.sellPrice | number:'1.2-2' }}</span>
+              <span class="text-cp-rojo fw-bold" style="font-size:1.1rem;">＋</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PÁGINA PRINCIPAL (comanda a pantalla completa) ══════════════════════ -->
+
+<!-- Header -->
+<div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+  <button class="btn btn-sm btn-outline-secondary rounded-3" (click)="volver()">← Volver</button>
+  <div class="flex-grow-1">
+    <h4 class="fw-bold text-dark mb-0">Mesa {{ mesaNumero }}</h4>
+    <p class="text-muted small mb-0">
+      <span *ngIf="!orden">Sin orden — Agrega productos para iniciar</span>
+      <span *ngIf="orden && orden.status === 'Abierta'" class="text-warning fw-semibold">🟡 Abierta · #{{ orden.orderNumber }}</span>
+      <span *ngIf="orden && orden.status === 'En Cocina'" class="text-primary fw-semibold">🍳 En Cocina · #{{ orden.orderNumber }}</span>
+    </p>
+  </div>
+  <!-- Botones de acción superiores -->
+  <div class="d-flex gap-2 flex-wrap align-items-center">
+
+    <!-- 🖨️ Impresora: botón conectar / badge conectada -->
+    <button *ngIf="!printerService.conectado()"
+      class="btn btn-sm btn-outline-secondary rounded-3 printer-btn"
+      (click)="printerService.conectar()"
+      title="Conectar impresora térmica">
+      🖨️ Conectar
+    </button>
+    <span *ngIf="printerService.conectado()"
+      class="badge printer-badge-on rounded-3 px-2 py-1"
+      (click)="printerService.desconectar()"
+      title="Toca para desconectar">
+      🖨️ {{ printerService.nombreImpresora() }}
+    </span>
+
+    <button *ngIf="orden && orden.status === 'Abierta' && orden.items.length > 0"
+      class="btn btn-outline-primary rounded-3 fw-semibold btn-sm"
+      [disabled]="guardando" (click)="enviarACocina()">
+      <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
+      🍳 Cocina
+    </button>
+    <button *ngIf="orden && orden.items.length > 0"
+      class="btn btn-premium rounded-3 fw-bold btn-sm px-3"
+      (click)="abrirModalCobro()">
+      💳 Cobrar
+    </button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div *ngIf="mensaje" class="alert alert-success rounded-3 py-2 px-3 mb-3">
+  <small>{{ mensaje }}</small>
+</div>
+<div *ngIf="error" class="alert alert-danger rounded-3 py-2 px-3 mb-3">
+  <small>⚠️ {{ error }}</small>
+</div>
+
+<!-- ─── Comanda (pantalla completa) ────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm rounded-4 comanda-card">
+  <div class="card-header bg-white border-0 pt-3 pb-2 px-4 d-flex align-items-center justify-content-between">
+    <h6 class="fw-bold mb-0">🧾 Comanda</h6>
+    <span *ngIf="orden" class="badge rounded-pill bg-light text-dark border">{{ orden.items.length }} ítems</span>
+  </div>
+  <div class="card-body px-4 pt-2">
+
+    <!-- Estado vacío -->
+    <div *ngIf="!orden || orden.items.length === 0"
+      class="text-center text-muted py-5">
+      <p class="fs-2 mb-2">📋</p>
+      <p class="fw-semibold mb-1">Comanda vacía</p>
+      <p class="small mb-4">Toca el botón de abajo para agregar productos</p>
+
+      <!-- Botón liberar mesa: solo si existe la orden (pero sin items) -->
+      <button
+        *ngIf="mostrarBotonLiberar"
+        class="btn btn-liberar rounded-3 fw-bold px-4 py-2"
+        (click)="abrirModalLiberar()">
+        🚪 El comensal se fue sin consumir
+      </button>
+    </div>
+
+    <!-- Items -->
+    <div *ngIf="orden && orden.items.length > 0">
+      <div *ngFor="let item of orden.items; let i = index"
+        class="d-flex align-items-center gap-3 py-3 comanda-item">
+        <!-- Cantidad badge -->
+        <div class="qty-badge rounded-circle d-flex align-items-center justify-content-center fw-bold">
+          {{ item.quantity }}
+        </div>
+        <!-- Nombre + precio unitario -->
+        <div class="flex-grow-1">
+          <p class="fw-semibold mb-0 text-dark">{{ item.productName }}</p>
+          <p class="text-muted mb-0 small">{{ item.quantity }} × ${{ item.unitPrice | number:'1.2-2' }}</p>
+        </div>
+        <!-- Subtotal -->
+        <span class="fw-bold">${{ item.subtotal | number:'1.2-2' }}</span>
+        <!-- Quitar -->
+        <button class="btn btn-sm btn-link text-danger p-0" (click)="quitarItem(i)">
+          <span style="font-size:1.1rem;">✕</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Totales -->
+    <div *ngIf="orden && orden.items.length > 0" class="totales-comanda mt-3">
+
+      <!-- Subtotal -->
+      <div class="d-flex justify-content-between align-items-center py-2">
+        <span class="text-muted">Subtotal</span>
+        <span class="text-dark">${{ orden.totals.subtotal | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Línea divisora -->
+      <hr class="my-1">
+
+      <!-- TOTAL USD -->
+      <div class="d-flex justify-content-between align-items-center py-2">
+        <span class="fw-bold fs-5 text-dark">TOTAL</span>
+        <span class="fw-bold fs-4 text-cp-rojo">${{ orden.totals.total | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Equivalencias en monedas locales -->
+      <div *ngIf="config" class="equivalencias-box rounded-3 p-3 mt-2">
+        <p class="text-muted mb-2" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;">Equivalencias</p>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <div class="d-flex align-items-center gap-2">
+            <span class="moneda-flag">🇻🇪</span>
+            <span class="small text-muted">Bolívares (BS)</span>
+          </div>
+          <span class="fw-semibold text-dark">Bs. {{ totalBs | number:'1.2-2' }}</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <span class="moneda-flag">🇨🇴</span>
+            <span class="small text-muted">Pesos (COP)</span>
+          </div>
+          <span class="fw-semibold text-dark">$ {{ totalCop | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FAB — Botón flotante "Agregar Productos" ════════════════════════════ -->
+<button
+  class="fab-agregar btn-premium rounded-circle shadow-lg"
+  (click)="abrirCatalogo()"
+  title="Agregar producto">
+  <span class="fab-icon">＋</span>
+</button>
