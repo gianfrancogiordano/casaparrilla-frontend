@@ -27,7 +27,8 @@ export class ThermalPrinterService {
   readonly conectado       = signal(false);
   readonly nombreImpresora = signal('');
 
-  private port:   SerialPort | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private port:   any | null = null;
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
 
   // ─── Conexión ──────────────────────────────────────────────────────────────

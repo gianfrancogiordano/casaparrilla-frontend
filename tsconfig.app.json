@@ -4,7 +4,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": ["web-bluetooth"]
+    "types": ["web-bluetooth", "w3c-web-serial"]
   },
   "files": [
     "src/main.ts"

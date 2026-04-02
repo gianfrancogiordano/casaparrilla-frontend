@@ -66,6 +66,12 @@ export class SidebarComponent implements OnInit {
       route: '/clientes',
       roles: ['Administrador'],
     },
+    {
+      label: 'Impresora',
+      icon: '🖨️',
+      route: '/test-printer',
+      roles: ['Administrador'],
+    },
   ];
 
   constructor(public authService: AuthService) {}
@@ -99,7 +105,7 @@ export class SidebarComponent implements OnInit {
 
   /** Items de configuración visibles */
   get configItems(): NavItem[] {
-    const config = ['Usuarios', 'Clientes VIP'];
+    const config = ['Usuarios', 'Clientes VIP', 'Impresora'];
     return this.menuItems.filter((i) => config.includes(i.label));
   }
 

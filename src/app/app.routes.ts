@@ -8,7 +8,6 @@ import { TestPrinterComponent } from './pages/test-printer/test-printer.componen
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'test-printer', component: TestPrinterComponent },
   { path: 'login', component: LoginComponent },
   {
     path: '',
@@ -19,6 +18,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'meseros', component: MeserosComponent },
       { path: 'meseros/:numero', component: MesaDetalleComponent },
+      { path: 'test-printer', component: TestPrinterComponent },
     ]
   },
   { path: '**', redirectTo: 'login', pathMatch: 'full' }
