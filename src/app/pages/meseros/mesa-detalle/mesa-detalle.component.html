@@ -303,24 +303,22 @@
         <span class="fw-bold fs-4 text-cp-rojo">${{ orden.totals.total | number:'1.2-2' }}</span>
       </div>
 
-      <!-- Equivalencias en monedas locales -->
-      <div *ngIf="config" class="equivalencias-box rounded-3 p-3 mt-2">
-        <p class="text-muted mb-2" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;">Equivalencias</p>
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <div class="d-flex align-items-center gap-2">
-            <span class="moneda-flag">🇻🇪</span>
-            <span class="small text-muted">Bolívares (BS)</span>
+        <!-- Equivalencias en monedas locales -->
+        <div *ngIf="config" class="equivalencias-box rounded-3 p-3 mt-2">
+          <p class="text-muted mb-2" style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;">Equivalencias</p>
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="d-flex align-items-center gap-2">
+              <span class="moneda-flag">🇻🇪 (Bs)</span>
+            </div>
+            <span class="fw-semibold text-dark">Bs. {{ totalBs | number:'1.2-2' }}</span>
           </div>
-          <span class="fw-semibold text-dark">Bs. {{ totalBs | number:'1.2-2' }}</span>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center gap-2">
-            <span class="moneda-flag">🇨🇴</span>
-            <span class="small text-muted">Pesos (COP)</span>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span class="moneda-flag">🇨🇴 (COP)</span>
+            </div>
+            <span class="fw-semibold text-dark">$ {{ totalCop | number:'1.0-0' }}</span>
           </div>
-          <span class="fw-semibold text-dark">$ {{ totalCop | number:'1.0-0' }}</span>
         </div>
-      </div>
 
     </div>
   </div>
