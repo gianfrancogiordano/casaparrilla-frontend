@@ -130,10 +130,17 @@ export class MesaDetalleComponent implements OnInit {
   // ─── Mini-modal de producto ─────────────────────────────────────────────────
 
   abrirModalProducto(producto: Product): void {
-    this.productoSeleccionado = producto;
-    this.cantidadSeleccionada = 1;
-    this.notaSeleccionada = '';
-    this.mostrarModalProducto = true;
+    // Cerrar el offcanvas ANTES de abrir el modal para que el input
+    // de búsqueda no robe el foco al textarea de la nota.
+    this.cerrarCatalogo();
+
+    // Pequeño delay para que el offcanvas termine de cerrarse
+    setTimeout(() => {
+      this.productoSeleccionado = producto;
+      this.cantidadSeleccionada = 1;
+      this.notaSeleccionada = '';
+      this.mostrarModalProducto = true;
+    }, 200);
   }
 
   cerrarModalProducto(): void {

@@ -154,6 +154,16 @@
   font-size: 0.82rem;
 }
 
+// Nombre del producto: truncar con ellipsis si es muy largo
+.comanda-nombre {
+  font-size: 0.88rem;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+// Necesario para que flex-grow funcione con truncado
+.min-w-0 { min-width: 0; }
+
 // ─── FAB - Botón flotante ───────────────────────────────────────────────────
 .fab-agregar {
   position: fixed;

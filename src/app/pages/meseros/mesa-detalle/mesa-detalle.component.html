@@ -253,32 +253,35 @@
     <!-- Items -->
     <div *ngIf="orden && orden.items.length > 0">
       <div *ngFor="let item of orden.items; let i = index"
-        class="d-flex align-items-center gap-3 py-3 comanda-item">
+        class="d-flex align-items-center gap-2 py-2 comanda-item">
         <!-- Cantidad badge -->
-        <div class="qty-badge rounded-circle d-flex align-items-center justify-content-center fw-bold">
+        <div class="qty-badge rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0">
           {{ item.quantity }}
         </div>
-        <!-- Nombre + precio unitario + estado -->
-        <div class="flex-grow-1">
-          <div class="d-flex align-items-center gap-2">
-            <p class="fw-semibold mb-0 text-dark">{{ item.productName }}</p>
-            <!-- Badge de estado -->
-            <span *ngIf="item.requiresKitchen && item.sentToCocina"
-              class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.65rem;">✅ En cocina</span>
-            <span *ngIf="item.requiresKitchen && !item.sentToCocina"
-              class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.65rem;">🟡 Nuevo</span>
-            <span *ngIf="!item.requiresKitchen"
-              class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.65rem;">🥤 Directo</span>
+        <!-- Nombre + estado + precio unitario -->
+        <div class="flex-grow-1 min-w-0">
+          <div class="d-flex align-items-center gap-1 flex-wrap">
+            <p class="fw-semibold mb-0 text-dark comanda-nombre">{{ item.productName }}</p>
           </div>
-          <p class="text-muted mb-0 small">{{ item.quantity }} × ${{ item.unitPrice | number:'1.2-2' }}</p>
-          <p *ngIf="item.notes" class="mb-0 mt-1" style="font-size:0.75rem; color:#e44; font-style:italic;">📝 {{ item.notes }}</p>
+          <!-- Badge de estado en línea propia -->
+          <div class="mb-0">
+            <span *ngIf="item.requiresKitchen && item.sentToCocina"
+              class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.6rem;">✅ En cocina</span>
+            <span *ngIf="item.requiresKitchen && !item.sentToCocina"
+              class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.6rem;">🟡 Nuevo</span>
+            <span *ngIf="!item.requiresKitchen"
+              class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.6rem;">🥤 Directo</span>
+          </div>
+          <p class="text-muted mb-0" style="font-size:0.75rem;">{{ item.quantity }} × ${{ item.unitPrice | number:'1.2-2' }}</p>
+          <p *ngIf="item.notes" class="mb-0" style="font-size:0.72rem; color:#e44; font-style:italic;">📝 {{ item.notes }}</p>
         </div>
-        <!-- Subtotal -->
-        <span class="fw-bold">${{ item.subtotal | number:'1.2-2' }}</span>
-        <!-- Quitar -->
-        <button class="btn btn-sm btn-link text-danger p-0" (click)="quitarItem(i)">
-          <span style="font-size:1.1rem;">✕</span>
-        </button>
+        <!-- Subtotal + Quitar (columna compacta) -->
+        <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+          <span class="fw-bold" style="font-size:0.9rem;">${{ item.subtotal | number:'1.2-2' }}</span>
+          <button class="btn btn-sm btn-link text-danger p-0" (click)="quitarItem(i)">
+            <span style="font-size:1rem;">✕</span>
+          </button>
+        </div>
       </div>
     </div>
 
