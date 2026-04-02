@@ -1,36 +1,44 @@
 <div class="container mt-4">
   <div class="card shadow-sm border-0">
     <div class="card-body p-4">
-      <h4 class="mb-3">Configuración de Impresora</h4>
-      <p class="text-secondary small">
-        Utiliza este panel para probar la conexión Bluetooth a la impresora MTP-II y diagnosticar problemas.
+      <h4 class="mb-1">Configuración de Impresora</h4>
+      <p class="text-secondary small mb-3">
+        Conexión vía <strong>Web Serial API</strong> (Bluetooth Clásico SPP).<br>
+        La MTP-II debe estar <strong>emparejada en Bluetooth del SO</strong> antes de conectar.
       </p>
 
       <div class="d-flex flex-wrap gap-2 mb-4">
         <button class="btn btn-primary" (click)="conectar()" *ngIf="!printer.conectado()">
-          Conectar Impresora
+          🔌 Conectar por Puerto Serie
         </button>
         <button class="btn btn-outline-danger" (click)="desconectar()" *ngIf="printer.conectado()">
-          Desconectar
+          ⛔ Desconectar
         </button>
         <button class="btn btn-success" (click)="testImpresionBasica()" [disabled]="!printer.conectado()">
-          Test Impresión Cruda
+          🖨️ Test Impresión
         </button>
       </div>
 
       <div class="alert mt-3" [ngClass]="printer.conectado() ? 'alert-success' : 'alert-secondary'">
-        <strong>Estado: </strong> {{ printer.conectado() ? 'Conectado a ' + printer.nombreImpresora() : 'Desconectado' }}
+        <strong>Estado:</strong>
+        {{ printer.conectado() ? '✅ Conectado a ' + printer.nombreImpresora() : '⚪ Desconectado' }}
+      </div>
+
+      <div class="alert alert-info small mt-2" *ngIf="!printer.conectado()">
+        <strong>¿No aparece la impresora?</strong><br>
+        1. Empareja la MTP-II en <em>Ajustes del Sistema &gt; Bluetooth</em> (sin usar Chrome)<br>
+        2. Pulsa "Conectar por Puerto Serie"<br>
+        3. Selecciona el puerto que diga <strong>MTP-II</strong> o <strong>tty.MTP-II</strong>
       </div>
 
       <h6 class="mt-4">Logs de Diagnóstico</h6>
-      <div class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.85rem;">
+      <div class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.82rem;">
         <div *ngIf="logs().length === 0" class="text-secondary">Esperando acciones...</div>
         <div *ngFor="let log of logs()" [ngClass]="{
-          'text-danger': log.startsWith('[ERROR]'),
-          'text-warning': log.startsWith('[WARN]')
-        }">
-          {{ log }}
-        </div>
+          'text-danger':  log.startsWith('[ERROR]'),
+          'text-warning': log.startsWith('[WARN]'),
+          'text-success': log.includes('exitosamente') || log.includes('Conectado')
+        }">{{ log }}</div>
       </div>
     </div>
   </div>

@@ -10,14 +10,14 @@ import { ThermalPrinterService } from '../../services/thermal-printer.service';
 })
 export class TestPrinterComponent implements OnDestroy {
   logs = signal<string[]>([]);
+
   private originales = {
-    log: console.log,
-    warn: console.warn,
+    log:   console.log,
+    warn:  console.warn,
     error: console.error
   };
 
   constructor(public printer: ThermalPrinterService) {
-    // Interceptar console para mostrarlo en pantalla
     console.log = (...args: any[]) => {
       this.addLog('INFO', args);
       this.originales.log.apply(console, args);
@@ -33,18 +33,18 @@ export class TestPrinterComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log = this.originales.log;
-    console.warn = this.originales.warn;
+    console.log   = this.originales.log;
+    console.warn  = this.originales.warn;
     console.error = this.originales.error;
   }
 
   addLog(level: string, args: any[]) {
     const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
-    this.logs.update(l => [ `[${level}] ${msg}`, ...l]);
+    this.logs.update(l => [`[${level}] ${msg}`, ...l]);
   }
 
   conectar() {
-    this.logs.set([]); // Limpiar logs
+    this.logs.set([]);
     this.printer.conectar();
   }
 
@@ -52,35 +52,38 @@ export class TestPrinterComponent implements OnDestroy {
     this.printer.desconectar();
   }
 
+  // Test directo por Web Serial: solo texto plano + ESC/POS mínimo
   async testImpresionBasica() {
     if (!this.printer.conectado()) {
-       alert("Debes conectar la impresora primero");
-       return; 
+      alert('Debes conectar la impresora primero.');
+      return;
     }
     try {
-      this.addLog('INFO', ['Generando ticket de prueba manual...']);
-      
-      const char = (this.printer as any).characteristic;
-      if (!char) throw new Error('No hay característica conectada');
+      this.addLog('INFO', ['Generando ticket de prueba...']);
+      // Acceso privado al writer para el test crudo
+      const writer = (this.printer as any).writer as WritableStreamDefaultWriter<Uint8Array>;
+      if (!writer) throw new Error('No hay writer conectado');
 
-      const text = "--------------------------------\n      HOLA DESDE CHROME\n       TEST DE IMPRESORA\n--------------------------------\n\n\n\n";
-      
+      const texto = "--------------------------------\n" +
+                    "   HOLA DESDE WEB SERIAL\n"      +
+                    "   TEST DE IMPRESORA MTP-II\n"   +
+                    "--------------------------------\n\n\n\n";
+
       const bytes = new Uint8Array([
-        0x1b, 0x40, // Init
-        ...Array.from(text).map(c => c.charCodeAt(0)),
-        0x1d, 0x56, 0x00 // Cut
+        0x1b, 0x40,                                          // ESC @ → Init
+        ...Array.from(texto).map(c => c.charCodeAt(0)),      // Texto plano
+        0x1d, 0x56, 0x00                                     // GS V 0 → Cut
       ]);
-      
-      this.addLog('INFO', ['Enviando por chunks...']);
-      for (let i = 0; i < bytes.length; i += 100) {
-        let chunk = bytes.slice(i, i+100);
-        await char.writeValue(chunk.buffer as ArrayBuffer);
+
+      this.addLog('INFO', [`Enviando ${bytes.length} bytes por Web Serial...`]);
+      for (let i = 0; i < bytes.length; i += 128) {
+        await writer.write(bytes.slice(i, i + 128));
         await new Promise(r => setTimeout(r, 50));
       }
-      this.addLog('INFO', ['Impresión manual términada con éxito!']);
+      this.addLog('INFO', ['✅ Test enviado exitosamente!']);
 
-    } catch(e: any) {
-      this.addLog('ERROR', [ `Falló la impresión cruda: ${e.message}` ]);
+    } catch (e: any) {
+      this.addLog('ERROR', [`Falló el test: ${e.message}`]);
     }
   }
 }
