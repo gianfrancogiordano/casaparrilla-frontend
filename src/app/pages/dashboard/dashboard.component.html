@@ -27,8 +27,8 @@
 <!-- ═══ MÉTRICAS ═══════════════════════════════════════════════════════════ -->
 <div *ngIf="data" class="row g-3 mb-4">
 
-  <!-- Ventas del Día -->
-  <div class="col-6 col-lg-3">
+  <!-- Ventas del Día (Admin only) -->
+  <div class="col-6 col-lg-3" *ngIf="!authService.isMesero()">
     <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-green">
       <div class="card-body p-3">
         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -69,8 +69,8 @@
     </div>
   </div>
 
-  <!-- Ticket Promedio -->
-  <div class="col-6 col-lg-3">
+  <!-- Ticket Promedio (Admin only) -->
+  <div class="col-6 col-lg-3" *ngIf="!authService.isMesero()">
     <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-red">
       <div class="card-body p-3">
         <div class="d-flex align-items-center justify-content-between mb-2">

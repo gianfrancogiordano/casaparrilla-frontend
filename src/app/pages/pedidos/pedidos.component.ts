@@ -3,6 +3,7 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrdersService, Order } from '../../services/orders.service';
 import { AlertService } from '../../services/alert.service';
+import { AuthService } from '../../services/auth.service';
 
 interface Filtros {
   busqueda: string;
@@ -52,12 +53,17 @@ export class PedidosComponent implements OnInit {
 
   constructor(
     private ordersService: OrdersService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.setFechaHoy(); // Por defecto mostrar las de hoy
-    this.cargarOrdenes();
+    if (this.authService.isMesero()) {
+      this.setFechaHoy();
+    } else {
+      this.setFechaHoy(); // For security/consistency
+      this.cargarOrdenes();
+    }
   }
 
   cargarOrdenes(): void {
@@ -97,18 +103,18 @@ export class PedidosComponent implements OnInit {
       resultado = resultado.filter(o => o.paymentInfo?.method === this.filtros.metodoPago);
     }
 
-    // Filtro de fecha desde
+    // Filtro de fecha desde (America/Caracas)
     if (this.filtros.fechaDesde) {
-      const desde = new Date(this.filtros.fechaDesde);
-      desde.setHours(0, 0, 0, 0);
-      resultado = resultado.filter(o => new Date(o.createdAt) >= desde);
+      const desdeVET = this.filtros.fechaDesde + 'T00:00:00-04:00';
+      const desdeTime = new Date(desdeVET).getTime();
+      resultado = resultado.filter(o => new Date(o.createdAt).getTime() >= desdeTime);
     }
 
-    // Filtro de fecha hasta
+    // Filtro de fecha hasta (America/Caracas)
     if (this.filtros.fechaHasta) {
-      const hasta = new Date(this.filtros.fechaHasta);
-      hasta.setHours(23, 59, 59, 999);
-      resultado = resultado.filter(o => new Date(o.createdAt) <= hasta);
+      const hastaVET = this.filtros.fechaHasta + 'T23:59:59-04:00';
+      const hastaTime = new Date(hastaVET).getTime();
+      resultado = resultado.filter(o => new Date(o.createdAt).getTime() <= hastaTime);
     }
 
     this.ordenesFiltradas = resultado;
@@ -117,13 +123,24 @@ export class PedidosComponent implements OnInit {
   }
 
   setFechaHoy(): void {
-    const hoy = new Date().toISOString().split('T')[0];
+    // Obtener hoy en formato YYYY-MM-DD según la zona horaria de Venezuela
+    const hoy = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'America/Caracas',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+    
     this.filtros.fechaDesde = hoy;
     this.filtros.fechaHasta = hoy;
-    this.aplicarFiltros();
+    this.cargarOrdenes();
   }
 
   limpiarFiltros(): void {
+    if (this.authService.isMesero()) {
+      this.setFechaHoy();
+      return;
+    }
     this.filtros = {
       busqueda: '',
       fechaDesde: '',
@@ -131,7 +148,7 @@ export class PedidosComponent implements OnInit {
       estado: '',
       metodoPago: '',
     };
-    this.aplicarFiltros();
+    this.cargarOrdenes();
   }
 
   // ── Estadísticas ───────────────────────────────────────────────────────────

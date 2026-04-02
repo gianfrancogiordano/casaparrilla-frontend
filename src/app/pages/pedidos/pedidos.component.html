@@ -25,13 +25,13 @@
         <div class="stat-label">Activas</div>
       </div>
     </div>
-    <div class="col-6">
+    <div class="col-6" *ngIf="!authService.isMesero()">
       <div class="stat-card stat-pagadas">
         <div class="stat-value">{{ stats.pagadas }}</div>
         <div class="stat-label">Pagadas</div>
       </div>
     </div>
-    <div class="col-6">
+    <div class="col-6" *ngIf="!authService.isMesero()">
       <div class="stat-card stat-ingresos">
         <div class="stat-value ingreso-val">{{ stats.ingresos | currency:'USD':'symbol':'1.0-2' }}</div>
         <div class="stat-label">Ingresos</div>
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Fila 2: Fechas -->
-    <div class="row g-2 mb-2">
+    <div class="row g-2 mb-2" *ngIf="!authService.isMesero()">
       <div class="col-6">
         <label class="filter-label">Desde</label>
         <input type="date" class="form-control form-control-sm rounded-3"
@@ -97,7 +97,7 @@
   </div>
 
   <!-- ══ RESUMEN PAGO ════════════════════════════════════════════════════ -->
-  <div class="pago-resumen mb-3" *ngIf="resumenPago.length > 0">
+  <div class="pago-resumen mb-3" *ngIf="resumenPago.length > 0 && !authService.isMesero()">
     <div class="pago-resumen-title">💳 Ingresos por método de pago</div>
     <div class="pago-chips-wrap">
       <span *ngFor="let rp of resumenPago" class="pago-chip">

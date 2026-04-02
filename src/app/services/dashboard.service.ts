@@ -37,13 +37,19 @@ export class DashboardService {
   }
 
   private calcular(orders: Order[]): DashboardData {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    // Calcular el inicio del día en Venezuela (UTC-4)
+    const hoyVET = new Intl.DateTimeFormat('sv-SE', {
+      timeZone: 'America/Caracas',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+    
+    const inicioHoyTime = new Date(`${hoyVET}T00:00:00-04:00`).getTime();
 
-    // Órdenes de hoy
+    // Órdenes de hoy (VET)
     const ordersHoy = orders.filter((o) => {
-      const created = new Date(o.createdAt);
-      return created >= hoy;
+      return new Date(o.createdAt).getTime() >= inicioHoyTime;
     });
 
     // Métricas

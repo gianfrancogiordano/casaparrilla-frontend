@@ -4,6 +4,7 @@ import { DashboardService, DashboardData } from '../../services/dashboard.servic
 import { Order } from '../../services/orders.service';
 import { Subscription, interval } from 'rxjs';
 import { switchMap, startWith } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +21,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Intervalo de auto-refresh: 60 segundos
   private readonly REFRESH_MS = 60_000;
 
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    public authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     // Carga inicial y luego refresca cada minuto
