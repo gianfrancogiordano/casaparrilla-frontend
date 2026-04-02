@@ -42,28 +42,48 @@ export class ThermalPrinterService {
       return;
     }
     try {
-      // Filtro por nombre "MTP-II" (nombre real según hoja de estado de la impresora)
-      // + UUID de servicio como alternativa por si el nombre varía
+      // Usamos acceptAllDevices para mostrar todos los dispositivos BLE cercanos.
+      // Muchas impresoras térmicas genéricas (MTP-II y clones) NO publican su
+      // UUID en los paquetes de advertising, por lo que los filtros por servicio
+      // lanzan "Unsupported device". Con acceptAllDevices lo evitamos.
       this.device = await navigator.bluetooth.requestDevice({
-        filters: [
-          { namePrefix: 'MTP-II' },       // nombre exacto según la hoja de estado
-          { services: [SERVICE_UUID] },    // fallback por UUID GATT
+        acceptAllDevices: true,
+        optionalServices: [
+          SERVICE_UUID,                            // MTP-II / ITPP072 / clones
+          '00001800-0000-1000-8000-00805f9b34fb',  // Generic Access
+          '00001801-0000-1000-8000-00805f9b34fb',  // Generic Attribute
+          '0000ae30-0000-1000-8000-00805f9b34fb',  // Goojprt / Peripage
+          '0000ff00-0000-1000-8000-00805f9b34fb',  // ISSC BLE Module
+          '0000ffe0-0000-1000-8000-00805f9b34fb',  // HM-10 BLE (común en clones)
         ],
-        optionalServices: [SERVICE_UUID],
       });
 
       this.device.addEventListener('gattserverdisconnected', () => this._onDesconectado());
 
-      const server  = await this.device.gatt!.connect();
-      const service = await server.getPrimaryService(SERVICE_UUID);
+      const server = await this.device.gatt!.connect();
+
+      // Intentar obtener el servicio principal. Si el UUID de fábrica falla,
+      // mostramos los servicios reales para diagnóstico en consola.
+      let service: BluetoothRemoteGATTService;
+      try {
+        service = await server.getPrimaryService(SERVICE_UUID);
+      } catch {
+        // Diagnóstico: listar todos los servicios disponibles en la impresora
+        const allServices = await server.getPrimaryServices();
+        console.warn(
+          '[ThermalPrinter] UUID primario no encontrado. Servicios disponibles:',
+          allServices.map(s => s.uuid)
+        );
+        throw new Error(`UUID de servicio no encontrado. Ver consola para servicios detectados.`);
+      }
+
       this.characteristic = await service.getCharacteristic(CHAR_UUID);
 
       // Cambiar codepage a PC850 para soporte de español (á,é,í,ó,ú,ñ,ü,¿,¡)
-      // La impresora arranca en GB2312 (chino) según la hoja de estado
       await this._enviarRaw(CMD_CODEPAGE_PC850);
 
       this.conectado.set(true);
-      this.nombreImpresora.set(this.device.name ?? 'MTP-II');
+      this.nombreImpresora.set(this.device.name ?? 'Impresora BLE');
 
       console.log('[ThermalPrinter] Conectado a:', this.device.name, '| Codepage: PC850');
     } catch (err: any) {
@@ -72,7 +92,7 @@ export class ThermalPrinterService {
         return;
       }
       console.error('[ThermalPrinter] Error al conectar:', err);
-      alert('No se pudo conectar a la impresora MTP-II.\n\n¿Está encendida y cerca del dispositivo?');
+      alert(`No se pudo conectar a la impresora.\n\n${err?.message ?? 'Error desconocido'}\n\n¿Está encendida y cerca del dispositivo?`);
       this.conectado.set(false);
     }
   }
