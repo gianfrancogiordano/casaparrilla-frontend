@@ -4,9 +4,11 @@ import { MainComponent } from './layout/main/main.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { MeserosComponent } from './pages/meseros/meseros.component';
 import { MesaDetalleComponent } from './pages/meseros/mesa-detalle/mesa-detalle.component';
+import { TestPrinterComponent } from './pages/test-printer/test-printer.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+  { path: 'test-printer', component: TestPrinterComponent },
   { path: 'login', component: LoginComponent },
   {
     path: '',

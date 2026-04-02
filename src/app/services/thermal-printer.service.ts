@@ -210,7 +210,11 @@ export class ThermalPrinterService {
   // ─── Envío raw (para comandos de inicialización) ──────────────────────────
 
   private async _enviarRaw(data: Uint8Array): Promise<void> {
-    await this.characteristic!.writeValue(data.buffer as ArrayBuffer);
+    try {
+      await this.characteristic!.writeValue(data.buffer as ArrayBuffer);
+    } catch (e) {
+      await this.characteristic!.writeValueWithoutResponse(data.buffer as ArrayBuffer);
+    }
     await new Promise(r => setTimeout(r, 100));
   }
 
@@ -220,11 +224,22 @@ export class ThermalPrinterService {
   //  Usamos 100 bytes con 60ms de pausa entre cada uno.
 
   private async _enviarEnChunks(data: Uint8Array): Promise<void> {
+    console.log(`[ThermalPrinter] Iniciando envío de ${data.length} bytes...`);
     for (let i = 0; i < data.length; i += CHUNK_SIZE) {
       const chunk = data.slice(i, i + CHUNK_SIZE);
-      await this.characteristic!.writeValueWithoutResponse(chunk);
-      await new Promise(r => setTimeout(r, 60));
+      const buffer = chunk.buffer as ArrayBuffer;
+      try {
+        // Usar writeValue fuerza a esperar el ACK de la impresora, 
+        // lo que evita que se sature el buffer o pierda los datos.
+        await this.characteristic!.writeValue(buffer);
+      } catch (e) {
+        console.warn(`[ThermalPrinter] Error en chunk ${i}. Reintentando con writeValueWithoutResponse...`, e);
+        // Fallback por si la impresora estrictamente exige WithoutResponse (muy raro)
+        await this.characteristic!.writeValueWithoutResponse(buffer);
+      }
+      // Un pequeño respiro de 50ms para la memoria de la impresora térmica
+      await new Promise(r => setTimeout(r, 50));
     }
-    console.log(`[ThermalPrinter] Ticket enviado (${data.length} bytes en chunks de ${CHUNK_SIZE}).`);
+    console.log(`[ThermalPrinter] Ticket enviado exitosamente.`);
   }
 }

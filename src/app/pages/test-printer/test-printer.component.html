@@ -1,0 +1,37 @@
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <h4 class="mb-3">Configuración de Impresora</h4>
+      <p class="text-secondary small">
+        Utiliza este panel para probar la conexión Bluetooth a la impresora MTP-II y diagnosticar problemas.
+      </p>
+
+      <div class="d-flex flex-wrap gap-2 mb-4">
+        <button class="btn btn-primary" (click)="conectar()" *ngIf="!printer.conectado()">
+          Conectar Impresora
+        </button>
+        <button class="btn btn-outline-danger" (click)="desconectar()" *ngIf="printer.conectado()">
+          Desconectar
+        </button>
+        <button class="btn btn-success" (click)="testImpresionBasica()" [disabled]="!printer.conectado()">
+          Test Impresión Cruda
+        </button>
+      </div>
+
+      <div class="alert mt-3" [ngClass]="printer.conectado() ? 'alert-success' : 'alert-secondary'">
+        <strong>Estado: </strong> {{ printer.conectado() ? 'Conectado a ' + printer.nombreImpresora() : 'Desconectado' }}
+      </div>
+
+      <h6 class="mt-4">Logs de Diagnóstico</h6>
+      <div class="bg-dark text-light p-3 rounded" style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.85rem;">
+        <div *ngIf="logs().length === 0" class="text-secondary">Esperando acciones...</div>
+        <div *ngFor="let log of logs()" [ngClass]="{
+          'text-danger': log.startsWith('[ERROR]'),
+          'text-warning': log.startsWith('[WARN]')
+        }">
+          {{ log }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
