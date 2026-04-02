@@ -7,6 +7,8 @@ import { ProductsService, Product } from '../../../services/products.service';
 import { ConfiguracionService, Configuracion } from '../../../services/configuracion.service';
 import { AuthService } from '../../../services/auth.service';
 import { ThermalPrinterService } from '../../../services/thermal-printer.service';
+import { ClientsService, Client } from '../../../services/clients.service';
+import { AlertService } from '../../../services/alert.service';
 import { forkJoin } from 'rxjs';
 
 // Bootstrap JS (disponible globalmente via angular.json scripts)
@@ -37,8 +39,6 @@ export class MesaDetalleComponent implements OnInit {
   cobrando = false;
   liberando = false;
   mostrarModalLiberar = false;
-  error = '';
-  mensaje = '';
 
   // Modal de producto (cantidad + nota)
   mostrarModalProducto = false;
@@ -58,6 +58,13 @@ export class MesaDetalleComponent implements OnInit {
     'Zelle':      '💜',
   };
 
+  // Gestión de Clientes VIP
+  mostrarModalCliente = false;
+  busquedaCliente = '';
+  clientesEncontrados: Client[] = [];
+  creandoNuevoCliente = false;
+  nuevoCliente = { name: '', phone: '' };
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -66,6 +73,8 @@ export class MesaDetalleComponent implements OnInit {
     private configuracionService: ConfiguracionService,
     private authService: AuthService,
     public  printerService: ThermalPrinterService,
+    private clientsService: ClientsService,
+    private alertService: AlertService,
   ) {}
 
   ngOnInit(): void {
@@ -91,7 +100,7 @@ export class MesaDetalleComponent implements OnInit {
 
         this.cargando = false;
       },
-      error: () => { this.cargando = false; this.error = 'Error al cargar datos.'; },
+      error: () => { this.cargando = false; this.alertService.error('Error al cargar datos del sistema.'); },
     });
   }
 
@@ -173,7 +182,7 @@ export class MesaDetalleComponent implements OnInit {
     const onSuccess = (orden: Order) => {
       this.orden = orden;
       this.guardando = false;
-      this.mostrarMensaje(`✅ ${producto.name} agregado`);
+      this.alertService.toast(`✅ ${producto.name} agregado`);
       this.cerrarCatalogo(); // ← cierra el offcanvas automáticamente
     };
 
@@ -189,12 +198,12 @@ export class MesaDetalleComponent implements OnInit {
       };
       this.ordersService.createOrder(payload as any).subscribe({
         next: onSuccess,
-        error: () => { this.guardando = false; this.error = 'Error al crear la orden.'; },
+        error: () => { this.guardando = false; this.alertService.error('Error al crear la orden.'); },
       });
     } else {
       this.ordersService.addItemToOrder(this.orden._id, item).subscribe({
         next: onSuccess,
-        error: () => { this.guardando = false; this.error = 'Error al agregar el producto.'; },
+        error: () => { this.guardando = false; this.alertService.error('Error al agregar el producto.'); },
       });
     }
   }
@@ -226,10 +235,10 @@ export class MesaDetalleComponent implements OnInit {
       next: () => {
         this.cobrando = false;
         this.mostrarModalCobro = false;
-        this.mostrarMensaje('✅ ¡Pago registrado! Mesa liberada.');
+        this.alertService.success('¡Pago registrado! Mesa liberada.');
         setTimeout(() => this.router.navigate(['/meseros']), 1200);
       },
-      error: () => { this.cobrando = false; this.error = 'Error al registrar el pago.'; },
+      error: () => { this.cobrando = false; this.alertService.error('Error al registrar el pago.'); },
     });
   }
 
@@ -242,28 +251,33 @@ export class MesaDetalleComponent implements OnInit {
 
   // ─── Enviar a cocina (rondas) ───────────────────────────────────────────────
 
-  enviarACocina(): void {
+  async enviarACocina(): Promise<void> {
     if (!this.orden) return;
     const pendientes = this.itemsPendientesCocina;
     if (pendientes.length === 0) return;
+
+    // VERIFICACIÓN DE IMPRESORA ANTES DE ENVIAR
+    if (!this.printerService.conectado()) {
+      const continuar = await this.alertService.confirm('Impresora No Conectada', '¿Deseas enviar el pedido a cocina de todas formas (sin imprimir)?', 'Sí, enviar sin imprimir');
+      if (!continuar) return;
+    }
 
     this.guardando = true;
     this.ordersService.sendToKitchen(this.orden._id).subscribe({
       next: (orden) => {
         this.orden = orden;
         this.guardando = false;
-        // Imprimir solo los ítems de esta ronda
+        // Imprimir solo los ítems de esta ronda si la impresora está disponible
         if (this.printerService.conectado()) {
-          // Creamos una orden temporal con solo los ítems nuevos
           const ordenParcial = { ...orden, items: pendientes };
           this.printerService.imprimirComanda(ordenParcial, this.mesaNumero)
-            .then(() => this.mostrarMensaje(`🍳 ${pendientes.length} item(s) enviados a cocina • 🖨️ Imprimiendo...`))
-            .catch(() => this.mostrarMensaje(`🍳 Enviado a cocina • ⚠️ Falla en impresora`));
+            .then(() => this.alertService.toast(`🍳 ${pendientes.length} item(s) enviados a cocina`, 'success'))
+            .catch(() => this.alertService.toast(`⚠️ Falla en impresora`, 'warning'));
         } else {
-          this.mostrarMensaje(`🍳 ${pendientes.length} item(s) enviados a cocina`);
+          this.alertService.toast(`🍳 ${pendientes.length} item(s) enviados (sin impresión)`, 'info');
         }
       },
-      error: () => { this.guardando = false; },
+      error: () => { this.guardando = false; this.alertService.error('Error al enviar a cocina.'); },
     });
   }
 
@@ -283,12 +297,12 @@ export class MesaDetalleComponent implements OnInit {
       next: () => {
         this.liberando = false;
         this.mostrarModalLiberar = false;
-        this.mostrarMensaje('✅ Mesa liberada correctamente.');
+        this.alertService.success('Mesa liberada correctamente.');
         setTimeout(() => this.router.navigate(['/meseros']), 1200);
       },
       error: () => {
         this.liberando = false;
-        this.error = 'Error al liberar la mesa. Intenta nuevamente.';
+        this.alertService.error('Error al liberar la mesa. Intenta nuevamente.');
       },
     });
   }
@@ -305,10 +319,59 @@ export class MesaDetalleComponent implements OnInit {
     return this.orden.totals.total * this.config.tasaCambioUsdCop;
   }
 
-  volver(): void { this.router.navigate(['/meseros']); }
+  // ─── Clientes VIP ───────────────────────────────────────────────────────────
 
-  mostrarMensaje(msg: string): void {
-    this.mensaje = msg;
-    setTimeout(() => this.mensaje = '', 2500);
+  abrirModalCliente(): void {
+    this.busquedaCliente = '';
+    this.clientesEncontrados = [];
+    this.creandoNuevoCliente = false;
+    this.nuevoCliente = { name: '', phone: '' };
+    this.mostrarModalCliente = true;
   }
+
+  buscarCliente(): void {
+    const term = this.busquedaCliente.trim().toLowerCase();
+    if (term.length < 3) {
+      this.clientesEncontrados = [];
+      return;
+    }
+    this.clientsService.getAll().subscribe(data => {
+      this.clientesEncontrados = data.filter(c => 
+        c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term))
+      );
+    });
+  }
+
+  vincularCliente(clienteId: string): void {
+    if (!this.orden) return;
+    this.ordersService.linkClientToOrder(this.orden._id, clienteId).subscribe({
+      next: (orden) => {
+        this.orden = orden;
+        this.mostrarModalCliente = false;
+        this.alertService.toast('👤 Cliente vinculado con éxito');
+      },
+      error: () => this.alertService.error('Error al vincular el cliente.')
+    });
+  }
+
+  crearYVincularCliente(): void {
+    if (!this.nuevoCliente.name || !this.nuevoCliente.phone) return;
+    this.clientsService.create(this.nuevoCliente).subscribe({
+      next: (cliente) => {
+        this.vincularCliente(cliente._id);
+      },
+      error: () => this.alertService.error('Error al crear el cliente.')
+    });
+  }
+
+  get clienteVinculadoNombre(): string | null {
+    if (!this.orden || !this.orden.clientId) return null;
+    // Si el backend popula el cliente, lo mostramos. Si no, mostramos "Cliente VIP"
+    if (typeof this.orden.clientId === 'object') {
+      return (this.orden.clientId as any).name;
+    }
+    return 'Cliente VIP';
+  }
+
+  volver(): void { this.router.navigate(['/meseros']); }
 }

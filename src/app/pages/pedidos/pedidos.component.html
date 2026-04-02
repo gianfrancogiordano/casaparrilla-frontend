@@ -1,0 +1,288 @@
+<div class="pedidos-page animate-fade-in">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h5 class="fw-bold mb-0">Historial de Pedidos</h5>
+      <p class="text-muted x-small mb-0">Control de órdenes del restaurante</p>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="cargarOrdenes()">
+      🔄 Actualizar
+    </button>
+  </div>
+
+  <!-- ══ STATS CARDS ══════════════════════════════════════════════════════ -->
+  <div class="row g-2 mb-3">
+    <div class="col-6">
+      <div class="stat-card stat-total">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Totales</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="stat-card stat-activas">
+        <div class="stat-value">{{ stats.activas }}</div>
+        <div class="stat-label">Activas</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="stat-card stat-pagadas">
+        <div class="stat-value">{{ stats.pagadas }}</div>
+        <div class="stat-label">Pagadas</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="stat-card stat-ingresos">
+        <div class="stat-value ingreso-val">{{ stats.ingresos | currency:'USD':'symbol':'1.0-2' }}</div>
+        <div class="stat-label">Ingresos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FILTROS ══════════════════════════════════════════════════════════ -->
+  <div class="filter-card mb-3">
+    <!-- Fila 1: Búsqueda + accesos rápidos -->
+    <div class="d-flex gap-2 mb-2">
+      <div class="position-relative flex-grow-1">
+        <span class="filter-icon">🔍</span>
+        <input type="text" class="form-control form-control-sm rounded-pill ps-4"
+               placeholder="Mesa, mesero o #orden..."
+               [(ngModel)]="filtros.busqueda" (input)="aplicarFiltros()">
+      </div>
+      <button class="btn btn-primary btn-sm rounded-pill px-3 flex-shrink-0" (click)="setFechaHoy()">Hoy</button>
+      <button class="btn btn-light btn-sm rounded-circle flex-shrink-0" style="width:32px;height:32px;" (click)="limpiarFiltros()">✕</button>
+    </div>
+
+    <!-- Fila 2: Fechas -->
+    <div class="row g-2 mb-2">
+      <div class="col-6">
+        <label class="filter-label">Desde</label>
+        <input type="date" class="form-control form-control-sm rounded-3"
+               [(ngModel)]="filtros.fechaDesde" (change)="aplicarFiltros()">
+      </div>
+      <div class="col-6">
+        <label class="filter-label">Hasta</label>
+        <input type="date" class="form-control form-control-sm rounded-3"
+               [(ngModel)]="filtros.fechaHasta" (change)="aplicarFiltros()">
+      </div>
+    </div>
+
+    <!-- Fila 3: Estado + Método de pago -->
+    <div class="row g-2">
+      <div class="col-6">
+        <label class="filter-label">Estado</label>
+        <select class="form-select form-select-sm rounded-3"
+                [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="Abierta">Abierta</option>
+          <option value="En Cocina">En Cocina</option>
+          <option value="Lista">Lista</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Cancelado">Cancelado</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="filter-label">Método de Pago</label>
+        <select class="form-select form-select-sm rounded-3"
+                [(ngModel)]="filtros.metodoPago" (change)="aplicarFiltros()">
+          <option value="">Todos</option>
+          <option value="Efectivo">Efectivo</option>
+          <option value="Pago Movil">Pago Móvil</option>
+          <option value="Zelle">Zelle</option>
+          <option value="Binance">Binance</option>
+          <option value="Bancolombia">Bancolombia</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RESUMEN PAGO ════════════════════════════════════════════════════ -->
+  <div class="pago-resumen mb-3" *ngIf="resumenPago.length > 0">
+    <div class="pago-resumen-title">💳 Ingresos por método de pago</div>
+    <div class="pago-chips-wrap">
+      <span *ngFor="let rp of resumenPago" class="pago-chip">
+        <b>{{ rp.metodo }}</b> — {{ rp.total | currency:'USD':'symbol':'1.0-2' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ══ RESULTADO COUNT ═════════════════════════════════════════════════ -->
+  <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+    <span class="small fw-bold text-dark">{{ ordenesFiltradas.length }} resultado(s)</span>
+    <span class="x-small text-muted">↓ Más recientes primero</span>
+  </div>
+
+  <!-- ══ MOBILE: lista de cards ════════════════════════════════════════ -->
+  <div class="d-md-none">
+    <div *ngIf="ordenesFiltradas.length === 0" class="empty-state">
+      <div class="fs-3">📭</div>
+      <div>Sin resultados con estos filtros</div>
+    </div>
+
+    <div class="order-card" *ngFor="let order of ordenesFiltradas" (click)="abrirDetalle(order)">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div>
+          <span class="order-number">#{{ order.orderNumber }}</span>
+          <span class="ms-2 fw-semibold text-dark">Mesa {{ order.table }}</span>
+        </div>
+        <span class="status-badge" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-end">
+        <div>
+          <div class="x-small text-muted">{{ getMeseroNombre(order) }}</div>
+          <div class="x-small text-muted">{{ order.createdAt | date:'dd/MM/yy HH:mm' }}</div>
+          <div class="x-small text-muted">{{ order.items.length }} plato(s)</div>
+        </div>
+        <div class="text-end">
+          <div class="fw-bold text-primary fs-6">{{ order.totals.total | currency:'USD':'symbol':'1.0-2' }}</div>
+          <span class="badge rounded-pill small" [ngClass]="getMetodoPagoBadge(order)">
+            {{ order.paymentInfo.method || '—' }}
+          </span>
+        </div>
+      </div>
+      <div class="text-end mt-2" *ngIf="order.status !== 'Pagado' && order.status !== 'Cancelado'">
+        <button class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                (click)="cancelarOrden(order); $event.stopPropagation()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESKTOP: tabla ═════════════════════════════════════════════════ -->
+  <div class="d-none d-md-block">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-0 overflow-auto">
+        <table class="table align-middle mb-0 custom-table">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4 py-3 text-muted small text-uppercase"># Orden</th>
+              <th class="py-3 text-muted small text-uppercase">Mesa / Mesero</th>
+              <th class="py-3 text-muted small text-uppercase">Fecha</th>
+              <th class="py-3 text-muted small text-uppercase">Items</th>
+              <th class="py-3 text-muted small text-uppercase">Total</th>
+              <th class="py-3 text-muted small text-uppercase">Pago</th>
+              <th class="py-3 text-muted small text-uppercase">Estado</th>
+              <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of ordenesFiltradas" class="hover-row" style="cursor:pointer;"
+                (click)="abrirDetalle(order)">
+              <td class="ps-4 py-3">
+                <span class="fw-mono fw-bold text-primary">#{{ order.orderNumber }}</span>
+              </td>
+              <td>
+                <div class="fw-semibold">Mesa {{ order.table }}</div>
+                <div class="text-muted small">{{ getMeseroNombre(order) }}</div>
+              </td>
+              <td>
+                <div class="small">{{ order.createdAt | date:'dd/MM/yyyy' }}</div>
+                <div class="text-muted x-small">{{ order.createdAt | date:'HH:mm' }}</div>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark rounded-pill">{{ order.items.length }}</span>
+              </td>
+              <td><span class="fw-bold">{{ order.totals.total | currency }}</span></td>
+              <td>
+                <span class="badge rounded-pill" [ngClass]="getMetodoPagoBadge(order)">
+                  {{ order.paymentInfo.method || '—' }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
+              </td>
+              <td class="pe-4 text-end" (click)="$event.stopPropagation()">
+                <button *ngIf="order.status !== 'Pagado' && order.status !== 'Cancelado'"
+                        class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                        (click)="cancelarOrden(order)">
+                  Cancelar
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="ordenesFiltradas.length === 0">
+              <td colspan="8" class="text-center py-5 text-muted">
+                <div class="fs-3 mb-2">📭</div>
+                No hay pedidos que coincidan con los filtros.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL DE DETALLE ════════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarDetalle}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
+    <div class="modal-content border-0 shadow-xl rounded-4 overflow-hidden" *ngIf="ordenSeleccionada">
+
+      <div class="modal-header border-0 py-3 px-4" [ngClass]="getStatusHeaderClass(ordenSeleccionada.status)">
+        <div>
+          <h6 class="modal-title fw-bold mb-0 text-white">Pedido #{{ ordenSeleccionada.orderNumber }}</h6>
+          <small class="text-white-50">{{ ordenSeleccionada.createdAt | date:'dd/MM/yy HH:mm' }}</small>
+        </div>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarDetalle()"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- Info general en grid 2x2 -->
+        <div class="row g-2 text-center mb-3">
+          <div class="col-6 col-sm-3">
+            <div class="detail-info-box">
+              <div class="detail-info-label">Mesa</div>
+              <div class="detail-info-val">{{ ordenSeleccionada.table }}</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="detail-info-box">
+              <div class="detail-info-label">Mesero</div>
+              <div class="detail-info-val small">{{ getMeseroNombre(ordenSeleccionada) }}</div>
+            </div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="detail-info-box">
+              <div class="detail-info-label">Estado</div>
+              <span class="status-badge" [ngClass]="getStatusClass(ordenSeleccionada.status)">{{ ordenSeleccionada.status }}</span>
+            </div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="detail-info-box">
+              <div class="detail-info-label">Pago</div>
+              <div class="detail-info-val small">{{ ordenSeleccionada.paymentInfo.method || '—' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="fw-bold small text-muted text-uppercase mb-2">Ítems</div>
+        <div class="item-list">
+          <div *ngFor="let item of ordenSeleccionada.items"
+               class="item-row d-flex justify-content-between align-items-start py-2">
+            <div class="flex-grow-1 me-2">
+              <span class="fw-semibold small">{{ item.quantity }}x {{ item.productName }}</span>
+              <div *ngIf="item.notes" class="text-muted x-small mt-1">📝 {{ item.notes }}</div>
+            </div>
+            <span class="fw-bold small text-nowrap">{{ item.subtotal | currency }}</span>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Subtotal</span>
+          <span class="small">{{ ordenSeleccionada.totals.subtotal | currency }}</span>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <span class="fw-bold">Total</span>
+          <span class="fw-bold text-primary">{{ ordenSeleccionada.totals.total | currency }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarDetalle" (click)="cerrarDetalle()"></div>

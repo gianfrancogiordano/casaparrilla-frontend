@@ -1,0 +1,245 @@
+.pedidos-page {
+  padding: 1rem;
+
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+.x-small { font-size: 0.72rem; }
+.fw-mono  { font-family: 'Roboto Mono', monospace; }
+
+// ── Stats Cards ────────────────────────────────────────────────────────────
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  border-left: 4px solid transparent;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  transition: transform 0.18s;
+
+  &:hover { transform: translateY(-2px); }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Valor de ingresos: más pequeño para evitar overflow
+  .ingreso-val {
+    font-size: 1.1rem;
+
+    @media (min-width: 400px) {
+      font-size: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #999;
+  }
+
+  &.stat-total    { border-color: #6366f1; .stat-value { color: #6366f1; } }
+  &.stat-activas  { border-color: #f59e0b; .stat-value { color: #f59e0b; } }
+  &.stat-pagadas  { border-color: #10b981; .stat-value { color: #10b981; } }
+  &.stat-ingresos { border-color: #3b82f6; .stat-value { color: #3b82f6; } }
+}
+
+// ── Filter card ────────────────────────────────────────────────────────────
+.filter-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+
+  .filter-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+
+  .filter-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+}
+
+// ── Resumen pago ───────────────────────────────────────────────────────────
+.pago-resumen {
+  background: #fff;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+
+  .pago-resumen-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #aaa;
+    margin-bottom: 8px;
+  }
+
+  .pago-chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pago-chip {
+    background: #f4f4f8;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    color: #444;
+    white-space: nowrap;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+// ── Mobile order cards ─────────────────────────────────────────────────────
+.order-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border-left: 4px solid transparent;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  .order-number {
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    color: #6366f1;
+    font-size: 0.85rem;
+  }
+}
+
+// ── Status badges ──────────────────────────────────────────────────────────
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.s-abierta   { background: rgba(251,191,36,0.15);  color: #b45309; }
+  &.s-cocina    { background: rgba(239,68,68,0.12);   color: #dc2626; }
+  &.s-lista     { background: rgba(99,102,241,0.15);  color: #4f46e5; }
+  &.s-pagado    { background: rgba(16,185,129,0.15);  color: #047857; }
+  &.s-cancelado { background: rgba(107,114,128,0.15); color: #374151; }
+}
+
+// ── Método de pago badges ──────────────────────────────────────────────────
+.mp-efectivo    { background: rgba(16,185,129,0.15) !important;  color: #047857 !important; }
+.mp-movil       { background: rgba(59,130,246,0.15) !important;  color: #1d4ed8 !important; }
+.mp-zelle       { background: rgba(139,92,246,0.15) !important;  color: #7c3aed !important; }
+.mp-binance     { background: rgba(251,191,36,0.15) !important;  color: #b45309 !important; }
+.mp-bancolombia { background: rgba(239,68,68,0.15) !important;   color: #b91c1c !important; }
+.mp-none        { background: #f1f3f5 !important;                 color: #888 !important; }
+
+// ── Desktop table ──────────────────────────────────────────────────────────
+.custom-table {
+  thead th {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-bottom: 2px solid #f1f3f5;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f8f9fa;
+    transition: background 0.15s;
+
+    &.hover-row:hover { background: #fcfcfe; }
+    &:last-child { border-bottom: 0; }
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────
+.modal {
+  z-index: 1060;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(3px);
+}
+
+.modal-backdrop { z-index: 1055; }
+
+.shadow-xl { box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important; }
+
+.modal-header {
+  &.h-abierta   { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  &.h-cocina    { background: linear-gradient(135deg, #ef4444, #dc2626); }
+  &.h-lista     { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+  &.h-pagado    { background: linear-gradient(135deg, #10b981, #059669); }
+  &.h-cancelado { background: linear-gradient(135deg, #6b7280, #4b5563); }
+}
+
+.detail-info-box {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 8px 6px;
+
+  .detail-info-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #aaa;
+    margin-bottom: 3px;
+  }
+
+  .detail-info-val {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+}
+
+.item-list {
+  .item-row {
+    border-bottom: 1px dashed #f0f0f0;
+    &:last-child { border-bottom: 0; }
+  }
+}

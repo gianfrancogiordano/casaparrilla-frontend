@@ -1,0 +1,157 @@
+<div class="container-fluid py-4 animate-fade-in">
+  <!-- Header con stats rápidos -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-3 card-stats-total">
+        <div class="d-flex align-items-center">
+          <div class="icon-shape rounded-circle bg-primary-soft text-primary me-3">
+            👥
+          </div>
+          <div>
+            <h6 class="text-muted small text-uppercase fw-bold mb-0">Clientes VIP</h6>
+            <h3 class="fw-bold mb-0">{{ clientes.length }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-3 card-stats-points">
+        <div class="d-flex align-items-center">
+          <div class="icon-shape rounded-circle bg-warning-soft text-warning me-3">
+            ⭐
+          </div>
+          <div>
+            <h6 class="text-muted small text-uppercase fw-bold mb-0">Total Puntos</h6>
+            <h3 class="fw-bold mb-0">{{ totalPuntos | number }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-3 card-stats-top">
+        <div class="d-flex align-items-center">
+          <div class="icon-shape rounded-circle bg-success-soft text-success me-3">
+            🏆
+          </div>
+          <div>
+            <h6 class="text-muted small text-uppercase fw-bold mb-0">Top Cliente</h6>
+            <h3 class="fw-bold mb-0 lh-1" style="font-size: 1.3rem;">{{ topCliente?.name || '—' }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla y controles -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 py-4 px-4">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-4">
+          <h4 class="fw-bold mb-0">Clientes VIP</h4>
+          <p class="text-muted small mb-0">Gestión de lealtad y beneficios</p>
+        </div>
+        <div class="col-12 col-md-8 text-md-end mt-3 mt-md-0">
+          <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+            <div class="search-box position-relative">
+              <span class="position-absolute ms-3 translate-middle-y top-50">🔍</span>
+              <input type="text" class="form-control rounded-pill ps-5" 
+                     placeholder="Buscar por nombre o teléfono..." 
+                     [(ngModel)]="searchText" (input)="filtrarClientes()">
+            </div>
+            <button class="btn btn-warning text-dark rounded-pill px-4 d-flex align-items-center" (click)="abrirModal()">
+              <span class="fs-5 me-2">+</span> Nuevo Cliente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body p-0 overflow-auto">
+      <table class="table align-middle mb-0 custom-table">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4 py-3 text-muted small text-uppercase">Cliente</th>
+            <th class="py-3 text-muted small text-uppercase">Teléfono</th>
+            <th class="py-3 text-muted small text-uppercase">Email</th>
+            <th class="py-3 text-muted small text-uppercase">Puntos</th>
+            <th class="py-3 text-muted small text-uppercase">Estado</th>
+            <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of clientesFiltrados" class="hover-row">
+            <td class="ps-4 py-3">
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">{{ item.name.charAt(0).toUpperCase() }}</div>
+                <div class="fw-semibold text-dark">{{ item.name }}</div>
+              </div>
+            </td>
+            <td>{{ item.phone || '—' }}</td>
+            <td class="text-muted small">{{ item.email || '—' }}</td>
+            <td>
+              <span class="badge bg-warning-soft text-warning rounded-pill px-3">
+                ⭐ {{ item.loyaltyPoints | number }} pts
+              </span>
+            </td>
+            <td>
+              <span class="badge border-0 rounded-pill px-3 py-2 text-capitalize bg-success-soft text-success">
+                VIP
+              </span>
+            </td>
+            <td class="pe-4 text-end">
+              <button class="btn btn-light btn-sm rounded-circle me-2" (click)="abrirModal(item)" title="Editar">✏️</button>
+              <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminarCliente(item)" title="Eliminar">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="clientesFiltrados.length === 0">
+            <td colspan="6" class="text-center py-5 text-muted">
+              No se encontraron clientes que coincidan con la búsqueda.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edición/Creación -->
+<div class="modal fade" id="modalCliente" tabindex="-1" [ngClass]="{'show d-block': mostrarModal}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">{{ editando ? 'Editar' : 'Nuevo' }} Cliente VIP</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <form (submit)="guardar()">
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Nombre Completo</label>
+            <input type="text" class="form-control rounded-3" name="name" [(ngModel)]="form.name" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Teléfono</label>
+              <input type="text" class="form-control rounded-3" name="phone" [(ngModel)]="form.phone" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Email</label>
+              <input type="email" class="form-control rounded-3" name="email" [(ngModel)]="form.email">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Puntos de fidelidad iniciales</label>
+            <input type="number" class="form-control rounded-3" name="loyaltyPoints" [(ngModel)]="form.loyaltyPoints">
+          </div>
+          <div class="mt-4">
+            <button type="submit" class="btn btn-warning w-100 py-3 rounded-3 fw-bold shadow-sm">
+              {{ editando ? 'Guardar Cambios' : 'Registrar Cliente' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModal"></div>

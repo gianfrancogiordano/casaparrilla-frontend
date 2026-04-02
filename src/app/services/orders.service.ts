@@ -21,6 +21,7 @@ export interface Order {
   orderType: string;
   table: string;
   waiterId: any;
+  clientId?: any; // New field for VIP client
   items: OrderItem[];
   totals: { subtotal: number; taxes: number; total: number };
   paymentInfo: { status: string; method?: string };
@@ -76,5 +77,9 @@ export class OrdersService {
 
   cancelOrder(orderId: string): Observable<Order> {
     return this.http.delete<Order>(`${this.API}/${orderId}`);
+  }
+
+  linkClientToOrder(orderId: string, clientId: string): Observable<Order> {
+    return this.http.patch<Order>(`${this.API}/${orderId}/client`, { clientId });
   }
 }

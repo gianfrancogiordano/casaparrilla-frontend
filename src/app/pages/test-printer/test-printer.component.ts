@@ -1,6 +1,7 @@
 import { Component, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ThermalPrinterService } from '../../services/thermal-printer.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-test-printer',
@@ -17,7 +18,10 @@ export class TestPrinterComponent implements OnDestroy {
     error: console.error
   };
 
-  constructor(public printer: ThermalPrinterService) {
+  constructor(
+    public printer: ThermalPrinterService,
+    private alertService: AlertService
+  ) {
     console.log = (...args: any[]) => {
       this.addLog('INFO', args);
       this.originales.log.apply(console, args);
@@ -55,7 +59,7 @@ export class TestPrinterComponent implements OnDestroy {
   // Test directo por Web Serial: solo texto plano + ESC/POS mínimo
   async testImpresionBasica() {
     if (!this.printer.conectado()) {
-      alert('Debes conectar la impresora primero.');
+      this.alertService.error('Debes conectar la impresora primero.');
       return;
     }
     try {

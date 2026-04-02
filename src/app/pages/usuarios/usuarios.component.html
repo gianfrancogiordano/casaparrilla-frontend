@@ -1,0 +1,235 @@
+<div class="usuarios-page animate-fade-in">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h5 class="fw-bold mb-0">Usuarios</h5>
+      <p class="text-muted x-small mb-0">Gestión de accesos al sistema</p>
+    </div>
+    <button class="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-2"
+            (click)="abrirModal()">
+      <span>+</span> Nuevo Usuario
+    </button>
+  </div>
+
+  <!-- ══ STATS ════════════════════════════════════════════════════════════ -->
+  <div class="row g-2 mb-3">
+    <div class="col-6">
+      <div class="stat-card stat-total">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="stat-card stat-activos">
+        <div class="stat-value">{{ stats.activos }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="stat-card stat-admins">
+        <div class="stat-value">{{ stats.admins }}</div>
+        <div class="stat-label">Administradores</div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="stat-card stat-meseros">
+        <div class="stat-value">{{ stats.meseros }}</div>
+        <div class="stat-label">Meseros</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FILTROS ══════════════════════════════════════════════════════════ -->
+  <div class="filter-card mb-3">
+    <div class="d-flex gap-2 mb-2">
+      <div class="position-relative flex-grow-1">
+        <span class="filter-icon">🔍</span>
+        <input type="text" class="form-control form-control-sm rounded-pill ps-4"
+               placeholder="Buscar por nombre o email..."
+               [(ngModel)]="busqueda" (input)="filtrar()">
+      </div>
+    </div>
+    <div class="row g-2">
+      <div class="col-6">
+        <label class="filter-label">Rol</label>
+        <select class="form-select form-select-sm rounded-3"
+                [(ngModel)]="filtroRol" (change)="filtrar()">
+          <option value="">Todos los roles</option>
+          <option *ngFor="let r of roles" [value]="r.name">{{ r.name }}</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="filter-label">Estado</label>
+        <select class="form-select form-select-sm rounded-3"
+                [(ngModel)]="filtroEstado" (change)="filtrar()">
+          <option value="">Todos</option>
+          <option value="activo">Activos</option>
+          <option value="inactivo">Inactivos</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONTADOR ══════════════════════════════════════════════════════════ -->
+  <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+    <span class="small fw-bold text-dark">{{ usuariosFiltrados.length }} resultado(s)</span>
+    <button class="btn btn-link btn-sm text-muted p-0 x-small" (click)="limpiarFiltros()">
+      Limpiar filtros
+    </button>
+  </div>
+
+  <!-- ══ MOBILE: cards ════════════════════════════════════════════════════ -->
+  <div class="d-md-none">
+    <div *ngIf="usuariosFiltrados.length === 0" class="empty-state">
+      <div class="fs-3">👥</div>
+      <div>No hay usuarios con estos filtros</div>
+    </div>
+
+    <div class="user-card" *ngFor="let u of usuariosFiltrados"
+         [class.user-card-inactive]="!u.active">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="d-flex align-items-center gap-2">
+          <div class="avatar-circle">{{ u.name.charAt(0).toUpperCase() }}</div>
+          <div>
+            <div class="fw-bold small">{{ u.name }}</div>
+            <div class="x-small text-muted">{{ u.email }}</div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="status-dot" [class.active-dot]="u.active" [class.inactive-dot]="!u.active"
+                title="{{ u.active ? 'Activo' : 'Inactivo' }}"></span>
+          <span class="role-badge" [ngClass]="getRolClass(u)">{{ getRolName(u) }}</span>
+        </div>
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <button class="btn btn-light btn-sm rounded-pill px-3"
+                (click)="toggleActivo(u)">
+          {{ u.active ? '🔒 Desactivar' : '✅ Activar' }}
+        </button>
+        <button class="btn btn-light btn-sm rounded-circle" (click)="abrirModal(u)">✏️</button>
+        <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminar(u)">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DESKTOP: tabla ═══════════════════════════════════════════════════ -->
+  <div class="d-none d-md-block">
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-0 overflow-auto">
+        <table class="table align-middle mb-0 custom-table">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4 py-3 text-muted small text-uppercase">Usuario</th>
+              <th class="py-3 text-muted small text-uppercase">Email</th>
+              <th class="py-3 text-muted small text-uppercase">Rol</th>
+              <th class="py-3 text-center text-muted small text-uppercase">Estado</th>
+              <th class="py-3 text-muted small text-uppercase">Creado</th>
+              <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuariosFiltrados" class="hover-row"
+                [class.row-inactive]="!u.active">
+              <td class="ps-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="avatar-circle">{{ u.name.charAt(0).toUpperCase() }}</div>
+                  <span class="fw-semibold">{{ u.name }}</span>
+                </div>
+              </td>
+              <td class="text-muted small">{{ u.email || '—' }}</td>
+              <td>
+                <span class="role-badge" [ngClass]="getRolClass(u)">{{ getRolName(u) }}</span>
+              </td>
+              <td class="text-center">
+                <div class="form-check form-switch d-flex justify-content-center" style="margin:0">
+                  <input class="form-check-input" type="checkbox"
+                         [checked]="u.active" (change)="toggleActivo(u)">
+                </div>
+              </td>
+              <td class="x-small text-muted">{{ u.createdAt | date:'dd/MM/yyyy' }}</td>
+              <td class="pe-4 text-end">
+                <button class="btn btn-light btn-sm rounded-circle me-1" (click)="abrirModal(u)">✏️</button>
+                <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminar(u)">🗑️</button>
+              </td>
+            </tr>
+            <tr *ngIf="usuariosFiltrados.length === 0">
+              <td colspan="6" class="text-center py-5 text-muted">
+                <div class="fs-3 mb-2">👥</div>
+                No hay usuarios con estos filtros.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ MODAL CREAR / EDITAR ═════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModal}" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-xl rounded-4 overflow-hidden">
+
+      <div class="modal-header border-0 py-3 px-4 bg-dark text-white">
+        <h6 class="modal-title fw-bold mb-0">
+          {{ editando ? 'Editar Usuario' : 'Nuevo Usuario' }}
+        </h6>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <form (ngSubmit)="guardar()">
+
+          <div class="mb-3">
+            <label class="form-label filter-label">Nombre de usuario</label>
+            <input type="text" class="form-control rounded-3"
+                   [(ngModel)]="form.name" name="name" required
+                   placeholder="ej: Juan Pérez">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label filter-label">Email</label>
+            <input type="email" class="form-control rounded-3"
+                   [(ngModel)]="form.email" name="email"
+                   placeholder="email@restaurante.com">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label filter-label">
+              Contraseña {{ editando ? '(dejar vacío para no cambiar)' : '' }}
+            </label>
+            <input type="password" class="form-control rounded-3"
+                   [(ngModel)]="form.password" name="password"
+                   [required]="!editando"
+                   placeholder="{{ editando ? 'Nueva contraseña...' : 'Contraseña' }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label filter-label">Rol</label>
+            <select class="form-select rounded-3"
+                    [(ngModel)]="form.role" name="role" required>
+              <option [value]="undefined" disabled>Seleccionar rol...</option>
+              <option *ngFor="let r of roles" [value]="r._id">{{ r.name }}</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="activeSwitch"
+                     [(ngModel)]="form.active" name="active">
+              <label class="form-check-label small" for="activeSwitch">Usuario activo</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-bold">
+            {{ editando ? 'Guardar Cambios' : 'Crear Usuario' }}
+          </button>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModal" (click)="cerrarModal()"></div>

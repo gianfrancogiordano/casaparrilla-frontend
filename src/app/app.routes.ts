@@ -5,6 +5,11 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { MeserosComponent } from './pages/meseros/meseros.component';
 import { MesaDetalleComponent } from './pages/meseros/mesa-detalle/mesa-detalle.component';
 import { TestPrinterComponent } from './pages/test-printer/test-printer.component';
+import { InventarioComponent } from './pages/inventario/inventario.component';
+import { ProductosComponent } from './pages/productos/productos.component';
+import { PedidosComponent } from './pages/pedidos/pedidos.component';
+import { UsuariosComponent } from './pages/usuarios/usuarios.component';
+import { ClientesComponent } from './pages/clientes/clientes.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -18,6 +23,11 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'meseros', component: MeserosComponent },
       { path: 'meseros/:numero', component: MesaDetalleComponent },
+      { path: 'inventario', component: InventarioComponent },
+      { path: 'productos', component: ProductosComponent },
+      { path: 'pedidos', component: PedidosComponent },
+      { path: 'usuarios', component: UsuariosComponent },
+      { path: 'clientes', component: ClientesComponent },
       { path: 'test-printer', component: TestPrinterComponent },
     ]
   },

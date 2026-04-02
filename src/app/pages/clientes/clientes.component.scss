@@ -1,0 +1,128 @@
+// ─── Estilos de la gestión de clientes VIP ──────────────────────────────────
+.container-fluid {
+  max-width: 1400px;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bg-primary-soft { background-color: rgba(99, 102, 241, 0.1); }
+.bg-warning-soft { background-color: rgba(245, 158, 11, 0.1); }
+.bg-success-soft { background-color: rgba(16, 185, 129, 0.1); }
+
+.icon-shape {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+}
+
+.custom-table {
+  thead th {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #f1f3f5;
+  }
+
+  tbody tr {
+    transition: background 0.2s;
+    border-bottom: 1px solid #f8f9fa;
+
+    &:last-child { border-bottom: 0; }
+    &.hover-row:hover { background-color: #fcfdfe; }
+  }
+}
+
+.search-box {
+  width: 100%;
+  max-width: 320px;
+  
+  input {
+    border-color: #f1f3f5;
+    background-color: #f8f9fa;
+    transition: all 0.2s;
+    
+    &:focus {
+      background-color: white;
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+    }
+  }
+
+  span {
+    color: #94a3b8;
+    left: 1rem;
+  }
+}
+
+.modal-content {
+  border-radius: 20px !important;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.15) !important;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  opacity: 1 !important;
+}
+
+.btn-warning {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.badge {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.card-stats-total { border-left: 5px solid #6366f1; }
+.card-stats-points { border-left: 5px solid #f59e0b; }
+.card-stats-top { border-left: 5px solid #10b981; }
+
+@media (max-width: 768px) {
+  .search-box {
+    max-width: none;
+    margin-bottom: 10px;
+  }
+  
+  .btn-warning {
+    width: 100%;
+    margin-top: 5px;
+  }
+}

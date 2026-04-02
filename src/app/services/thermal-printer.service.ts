@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import ReceiptPrinterEncoder from '@point-of-sale/receipt-printer-encoder';
+import { AlertService } from './alert.service';
 import { Order } from './orders.service';
 
 // ─── Specs de la MTP-II ───────────────────────────────────────────────────────
@@ -31,14 +32,16 @@ export class ThermalPrinterService {
   private port:   any | null = null;
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
 
+  constructor(private alertService: AlertService) {}
+
   // ─── Conexión ──────────────────────────────────────────────────────────────
 
   async conectar(): Promise<void> {
     if (!('serial' in navigator)) {
-      alert(
-        'Este navegador no soporta Web Serial.\n' +
-        'Usa Google Chrome en escritorio (Mac/Windows/Linux).\n' +
-        'Asegúrate de que la impresora MTP-II esté emparejada en Bluetooth primero.'
+      this.alertService.alert(
+        'Navegador no soportado',
+        'Este navegador no soporta Web Serial. Usa Google Chrome en escritorio y asegúrate de que la impresora esté emparejada.',
+        'error'
       );
       return;
     }
@@ -68,12 +71,10 @@ export class ThermalPrinterService {
         return;
       }
       console.error('[ThermalPrinter] Error al conectar:', err);
-      alert(
-        `No se pudo conectar a la impresora.\n\n${err?.message ?? 'Error desconocido'}\n\n` +
-        'Verifica que:\n' +
-        '  1. La MTP-II esté encendida\n' +
-        '  2. Esté emparejada en Bluetooth del SO (no en Chrome)\n' +
-        '  3. Estés usando Chrome en Mac o Windows'
+      this.alertService.alert(
+        'Error de Conexión',
+        `No se pudo conectar a la impresora. ${err?.message ?? ''}\n\nVerifica que esté encendida, emparejada y que uses Chrome.`,
+        'error'
       );
       this.conectado.set(false);
     }

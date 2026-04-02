@@ -1,0 +1,169 @@
+<div class="container-fluid py-4 animate-fade-in">
+  <!-- Header con stats rápidos -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-3 card-stats-total">
+        <div class="d-flex align-items-center">
+          <div class="icon-shape rounded-circle bg-primary-soft text-primary me-3">
+            📦
+          </div>
+          <div>
+            <h6 class="text-muted small text-uppercase fw-bold mb-0">Total Ingredientes</h6>
+            <h3 class="fw-bold mb-0">{{ ingredientes.length }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-3 card-stats-warning">
+        <div class="d-flex align-items-center">
+          <div class="icon-shape rounded-circle bg-warning-soft text-warning me-3">
+            ⚠️
+          </div>
+          <div>
+            <h6 class="text-muted small text-uppercase fw-bold mb-0">Stock Bajo</h6>
+            <h3 class="fw-bold mb-0">{{ lowStockCount }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 p-3 card-stats-danger">
+        <div class="d-flex align-items-center">
+          <div class="icon-shape rounded-circle bg-danger-soft text-danger me-3">
+            🛑
+          </div>
+          <div>
+            <h6 class="text-muted small text-uppercase fw-bold mb-0">Sin Stock</h6>
+            <h3 class="fw-bold mb-0">{{ outOfStockCount }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla y controles -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 py-4 px-4">
+      <div class="row align-items-center">
+        <div class="col-12 col-md-4">
+          <h4 class="fw-bold mb-0">Inventario</h4>
+          <p class="text-muted small mb-0">Gestión de insumos y materias primas</p>
+        </div>
+        <div class="col-12 col-md-8 text-md-end mt-3 mt-md-0">
+          <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+            <div class="search-box position-relative">
+              <span class="position-absolute ms-3 translate-middle-y top-50">🔍</span>
+              <input type="text" class="form-control rounded-pill ps-5" 
+                     placeholder="Buscar ingrediente..." 
+                     [(ngModel)]="searchText" (input)="filtrarIngredientes()">
+            </div>
+            <button class="btn btn-primary rounded-pill px-4 d-flex align-items-center" (click)="abrirModal()">
+              <span class="fs-5 me-2">+</span> Nuevo Ingrediente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body p-0 overflow-auto">
+      <table class="table align-middle mb-0 custom-table">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4 py-3 text-muted small text-uppercase">Ingrediente</th>
+            <th class="py-3 text-muted small text-uppercase">Unidad</th>
+            <th class="py-3 text-muted small text-uppercase">Costo/U</th>
+            <th class="py-3 text-muted small text-uppercase">Stock</th>
+            <th class="py-3 text-muted small text-uppercase">Estado</th>
+            <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of ingredientesFiltrados" class="hover-row">
+            <td class="ps-4 py-3">
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">{{ item.name.charAt(0).toUpperCase() }}</div>
+                <div class="fw-semibold text-dark">{{ item.name }}</div>
+              </div>
+            </td>
+            <td><span class="badge bg-light text-dark rounded-pill">{{ item.unitMeasure }}</span></td>
+            <td>{{ item.unitCost | currency }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-icon-sm btn-outline-danger" (click)="ajusteRapido(item, -1)">-</button>
+                <div class="stock-value fw-bold" [ngClass]="getStockColor(item)">
+                  {{ item.currentStock | number:'1.0-2' }}
+                </div>
+                <button class="btn btn-icon-sm btn-outline-success" (click)="ajusteRapido(item, 1)">+</button>
+              </div>
+            </td>
+            <td>
+              <span class="badge border-0 rounded-pill px-3 py-2 text-capitalize" [ngClass]="getStatusBadgeClass(item)">
+                {{ getStatusText(item) }}
+              </span>
+            </td>
+            <td class="pe-4 text-end">
+              <button class="btn btn-light btn-sm rounded-circle me-2" (click)="abrirModal(item)" title="Editar">✏️</button>
+              <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminarIngrediente(item)" title="Eliminar">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="ingredientesFiltrados.length === 0">
+            <td colspan="6" class="text-center py-5 text-muted">
+              No se encontraron ingredientes que coincidan con la búsqueda.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Edición/Creación -->
+<div class="modal fade" id="modalIngrediente" tabindex="-1" [ngClass]="{'show d-block': mostrarModal}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">{{ editando ? 'Editar' : 'Nuevo' }} Ingrediente</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <form (submit)="guardar()">
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Nombre</label>
+            <input type="text" class="form-control rounded-3" name="name" [(ngModel)]="form.name" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Unidad de Medida</label>
+              <select class="form-select rounded-3" name="unitMeasure" [(ngModel)]="form.unitMeasure" required>
+                <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Costo por Unidad ($)</label>
+              <input type="number" step="0.01" class="form-control rounded-3" name="unitCost" [(ngModel)]="form.unitCost" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Stock Actual</label>
+              <input type="number" step="0.01" class="form-control rounded-3" name="currentStock" [(ngModel)]="form.currentStock" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Stock Mínimo (Alerta)</label>
+              <input type="number" step="0.01" class="form-control rounded-3" name="minStock" [(ngModel)]="form.minStock" required>
+            </div>
+          </div>
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold">
+              {{ editando ? 'Guardar Cambios' : 'Crear Ingrediente' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModal"></div>

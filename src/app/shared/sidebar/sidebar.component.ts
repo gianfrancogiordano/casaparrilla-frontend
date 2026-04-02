@@ -49,7 +49,7 @@ export class SidebarComponent implements OnInit {
     },
     {
       label: 'Inventario',
-      icon: '📋',
+      icon: '📦',
       route: '/inventario',
       roles: ['Administrador'],
     },

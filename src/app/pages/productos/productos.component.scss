@@ -1,0 +1,109 @@
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.search-box {
+  min-width: 250px;
+  
+  input {
+    border-color: #eee;
+    background-color: #f8f9fa;
+    transition: all 0.2s;
+    
+    &:focus {
+      background-color: #fff;
+      box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.1);
+      border-color: #333;
+    }
+  }
+}
+
+.custom-table {
+  thead th {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #f8f9fa;
+  }
+  
+  tbody tr {
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f1f1f1;
+    
+    &:last-child { border-bottom: 0; }
+    
+    &.hover-row:hover {
+      background-color: #fcfcfc;
+    }
+  }
+}
+
+.avatar-square {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #eee, #ddd);
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.bg-info-soft { background-color: rgba(13, 202, 240, 0.1); }
+
+.x-small { font-size: 0.7rem; }
+
+.recipe-list {
+  background-color: #fcfdfe;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dashed #eee;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #eee;
+    border-radius: 10px;
+  }
+}
+
+.recipe-item {
+  border: 1px solid #f0f0f0 !important;
+  background-color: #fff;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+  }
+}
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1060;
+  
+  &.show {
+    backdrop-filter: blur(4px);
+  }
+}
+
+.modal-backdrop {
+  z-index: 1055;
+}
+
+.bg-light-subtle {
+  background-color: #f9fbfe !important;
+}
+
+.form-check-input:checked {
+  background-color: #333;
+  border-color: #333;
+}

@@ -181,6 +181,11 @@
   <button class="btn btn-sm btn-outline-secondary rounded-3" (click)="volver()">← Volver</button>
   <div class="flex-grow-1">
     <h4 class="fw-bold text-dark mb-0">Mesa {{ mesaNumero }}</h4>
+    <div *ngIf="clienteVinculadoNombre" class="mb-1">
+      <span class="badge bg-warning text-dark border-0 rounded-pill x-small">
+        👤 {{ clienteVinculadoNombre }}
+      </span>
+    </div>
     <p class="text-muted small mb-0">
       <span *ngIf="!orden">Sin orden — Agrega productos para iniciar</span>
       <span *ngIf="orden && orden.status === 'Abierta'" class="text-warning fw-semibold">🟡 Abierta · #{{ orden.orderNumber }}</span>
@@ -204,6 +209,12 @@
       🖨️ {{ printerService.nombreImpresora() }}
     </span>
 
+    <button *ngIf="orden && !orden.clientId"
+      class="btn btn-sm btn-outline-warning text-dark rounded-3 fw-semibold x-small"
+      (click)="abrirModalCliente()">
+      👤 Vincular VIP
+    </button>
+
     <button *ngIf="orden && itemsPendientesCocina.length > 0"
       class="btn btn-outline-primary rounded-3 fw-semibold btn-sm"
       [disabled]="guardando" (click)="enviarACocina()">
@@ -216,14 +227,6 @@
       💳 Cobrar
     </button>
   </div>
-</div>
-
-<!-- Toast -->
-<div *ngIf="mensaje" class="alert alert-success rounded-3 py-2 px-3 mb-3">
-  <small>{{ mensaje }}</small>
-</div>
-<div *ngIf="error" class="alert alert-danger rounded-3 py-2 px-3 mb-3">
-  <small>⚠️ {{ error }}</small>
 </div>
 
 <!-- ─── Comanda (pantalla completa) ────────────────────────────────────────── -->
@@ -331,3 +334,71 @@
   title="Agregar producto">
   <span class="fab-icon">＋</span>
 </button>
+
+<!-- ══ MODAL VINCULAR CLIENTE ═══════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalCliente}" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      
+      <div class="modal-header border-0 bg-dark text-white py-3">
+        <h6 class="modal-title fw-bold mb-0 text-white">👤 Vincular Cliente VIP</h6>
+        <button type="button" class="btn-close btn-close-white" (click)="mostrarModalCliente = false"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        
+        <!-- Vista Búsqueda -->
+        <div *ngIf="!creandoNuevoCliente">
+          <div class="search-box mb-3 position-relative">
+            <input type="text" class="form-control form-control-sm rounded-pill ps-4" 
+                   placeholder="Nombre o teléfono..." 
+                   [(ngModel)]="busquedaCliente" (input)="buscarCliente()">
+            <span class="position-absolute start-0 top-50 translate-middle-y ms-2 x-small">🔍</span>
+          </div>
+
+          <div class="list-group list-group-flush mb-3" style="max-height: 200px; overflow-y: auto;">
+            <button *ngFor="let c of clientesEncontrados" 
+                    class="list-group-item list-group-item-action border-0 px-2 py-2 d-flex justify-content-between align-items-center rounded-3 mb-1"
+                    style="background: #f8f9fa;"
+                    (click)="vincularCliente(c._id)">
+              <div class="text-start">
+                <div class="fw-bold small text-dark">{{ c.name }}</div>
+                <div class="x-small text-muted">{{ c.phone }}</div>
+              </div>
+              <span class="badge bg-warning text-dark rounded-pill x-small">⭐ {{ c.loyaltyPoints }}</span>
+            </button>
+            <div *ngIf="busquedaCliente.length >= 3 && clientesEncontrados.length === 0" class="text-center py-3 text-muted x-small">
+              No se encontraron resultados
+            </div>
+            <div *ngIf="busquedaCliente.length > 0 && busquedaCliente.length < 3" class="text-center py-2 text-muted x-small">
+              Escribe al menos 3 caracteres...
+            </div>
+          </div>
+
+          <button class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-bold" (click)="creandoNuevoCliente = true">
+            + Crear Nuevo Cliente
+          </button>
+        </div>
+
+        <!-- Vista Creación Rápida -->
+        <div *ngIf="creandoNuevoCliente">
+          <div class="mb-3">
+            <label class="x-small fw-bold text-muted text-uppercase mb-1">Nombre Completo</label>
+            <input type="text" class="form-control form-control-sm rounded-3" [(ngModel)]="nuevoCliente.name">
+          </div>
+          <div class="mb-3">
+            <label class="x-small fw-bold text-muted text-uppercase mb-1">Teléfono</label>
+            <input type="text" class="form-control form-control-sm rounded-3" [(ngModel)]="nuevoCliente.phone">
+          </div>
+          
+          <div class="d-flex gap-2">
+            <button class="btn btn-light btn-sm flex-grow-1 rounded-pill fw-bold" (click)="creandoNuevoCliente = false">Atrás</button>
+            <button class="btn btn-primary btn-sm flex-grow-1 rounded-pill fw-bold" (click)="crearYVincularCliente()">Vincular</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
