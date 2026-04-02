@@ -70,7 +70,7 @@ export class SidebarComponent implements OnInit {
       label: 'Impresora',
       icon: '🖨️',
       route: '/test-printer',
-      roles: ['Administrador'],
+      roles: ['Administrador', 'Mesero'],
     },
   ];
 
