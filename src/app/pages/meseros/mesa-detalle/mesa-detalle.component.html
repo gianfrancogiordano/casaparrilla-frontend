@@ -158,11 +158,11 @@
       🖨️ {{ printerService.nombreImpresora() }}
     </span>
 
-    <button *ngIf="orden && orden.status === 'Abierta' && orden.items.length > 0"
+    <button *ngIf="orden && itemsPendientesCocina.length > 0"
       class="btn btn-outline-primary rounded-3 fw-semibold btn-sm"
       [disabled]="guardando" (click)="enviarACocina()">
       <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
-      🍳 Cocina
+      🍳 Cocina ({{ itemsPendientesCocina.length }})
     </button>
     <button *ngIf="orden && orden.items.length > 0"
       class="btn btn-premium rounded-3 fw-bold btn-sm px-3"
@@ -212,9 +212,18 @@
         <div class="qty-badge rounded-circle d-flex align-items-center justify-content-center fw-bold">
           {{ item.quantity }}
         </div>
-        <!-- Nombre + precio unitario -->
+        <!-- Nombre + precio unitario + estado -->
         <div class="flex-grow-1">
-          <p class="fw-semibold mb-0 text-dark">{{ item.productName }}</p>
+          <div class="d-flex align-items-center gap-2">
+            <p class="fw-semibold mb-0 text-dark">{{ item.productName }}</p>
+            <!-- Badge de estado -->
+            <span *ngIf="item.requiresKitchen && item.sentToCocina"
+              class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.65rem;">✅ En cocina</span>
+            <span *ngIf="item.requiresKitchen && !item.sentToCocina"
+              class="badge bg-warning bg-opacity-10 text-warning" style="font-size: 0.65rem;">🟡 Nuevo</span>
+            <span *ngIf="!item.requiresKitchen"
+              class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.65rem;">🥤 Directo</span>
+          </div>
           <p class="text-muted mb-0 small">{{ item.quantity }} × ${{ item.unitPrice | number:'1.2-2' }}</p>
         </div>
         <!-- Subtotal -->

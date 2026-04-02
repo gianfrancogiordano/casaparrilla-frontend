@@ -11,6 +11,7 @@ export interface Product {
   category?: string;
   imageUrl?: string;
   available: boolean;
+  requiresKitchen?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

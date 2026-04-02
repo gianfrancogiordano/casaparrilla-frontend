@@ -10,6 +10,8 @@ export interface OrderItem {
   unitPrice: number;
   subtotal: number;
   notes?: string;
+  sentToCocina?: boolean;
+  requiresKitchen?: boolean;
 }
 
 export interface Order {
@@ -62,6 +64,10 @@ export class OrdersService {
 
   updateOrderStatus(orderId: string, status: string): Observable<Order> {
     return this.http.patch<Order>(`${this.API}/${orderId}`, { status });
+  }
+
+  sendToKitchen(orderId: string): Observable<Order> {
+    return this.http.post<Order>(`${this.API}/${orderId}/send-to-kitchen`, {});
   }
 
   payOrder(orderId: string, paymentMethod: 'Efectivo' | 'Pago Movil' | 'Binance' | 'Bancolombia' | 'Zelle'): Observable<Order> {

@@ -133,6 +133,7 @@ export class MesaDetalleComponent implements OnInit {
       quantity: cantidad,
       unitPrice: producto.sellPrice,
       subtotal: cantidad * producto.sellPrice,
+      requiresKitchen: producto.requiresKitchen ?? true,
     };
 
     const onSuccess = (orden: Order) => {
@@ -198,22 +199,34 @@ export class MesaDetalleComponent implements OnInit {
     });
   }
 
-  // ─── Enviar a cocina ─────────────────────────────────────────────────────────
+  // ── Getter: ítems pendientes de envío a cocina ──────────────────────────────
+
+  get itemsPendientesCocina(): OrderItem[] {
+    if (!this.orden) return [];
+    return this.orden.items.filter(i => i.requiresKitchen && !i.sentToCocina);
+  }
+
+  // ─── Enviar a cocina (rondas) ───────────────────────────────────────────────
 
   enviarACocina(): void {
     if (!this.orden) return;
+    const pendientes = this.itemsPendientesCocina;
+    if (pendientes.length === 0) return;
+
     this.guardando = true;
-    this.ordersService.updateOrderStatus(this.orden._id, 'En Cocina').subscribe({
+    this.ordersService.sendToKitchen(this.orden._id).subscribe({
       next: (orden) => {
         this.orden = orden;
         this.guardando = false;
-        // Intentar imprimir si la impresora está conectada
+        // Imprimir solo los ítems de esta ronda
         if (this.printerService.conectado()) {
-          this.printerService.imprimirComanda(orden, this.mesaNumero)
-            .then(() => this.mostrarMensaje('🍳 Enviada a cocina • 🖨️ Imprimiendo...'))
-            .catch(() => this.mostrarMensaje('🍳 Enviada a cocina • ⚠️ Falla en impresora'));
+          // Creamos una orden temporal con solo los ítems nuevos
+          const ordenParcial = { ...orden, items: pendientes };
+          this.printerService.imprimirComanda(ordenParcial, this.mesaNumero)
+            .then(() => this.mostrarMensaje(`🍳 ${pendientes.length} item(s) enviados a cocina • 🖨️ Imprimiendo...`))
+            .catch(() => this.mostrarMensaje(`🍳 Enviado a cocina • ⚠️ Falla en impresora`));
         } else {
-          this.mostrarMensaje('🍳 Orden enviada a cocina');
+          this.mostrarMensaje(`🍳 ${pendientes.length} item(s) enviados a cocina`);
         }
       },
       error: () => { this.guardando = false; },
