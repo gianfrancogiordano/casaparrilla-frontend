@@ -1,3 +1,49 @@
+<!-- ═══ MINI-MODAL: Agregar Producto (cantidad + nota) ══════════════════════ -->
+<div *ngIf="mostrarModalProducto && productoSeleccionado" class="modal-overlay" (click)="cerrarModalProducto()">
+  <div class="modal-cobro rounded-4 shadow-lg p-4" style="max-width:340px" (click)="$event.stopPropagation()">
+
+    <!-- Encabezado -->
+    <div class="d-flex align-items-start justify-content-between mb-3">
+      <div>
+        <h5 class="fw-bold mb-0">{{ productoSeleccionado.name }}</h5>
+        <span class="text-cp-rojo fw-bold">${{ productoSeleccionado.sellPrice | number:'1.2-2' }}</span>
+        <span *ngIf="productoSeleccionado.category" class="text-muted small ms-2">{{ productoSeleccionado.category }}</span>
+      </div>
+      <button class="btn btn-sm btn-link text-muted p-0" (click)="cerrarModalProducto()">✕</button>
+    </div>
+
+    <!-- Selector de cantidad -->
+    <p class="fw-semibold small mb-2">Cantidad:</p>
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <button class="btn btn-outline-secondary rounded-circle fw-bold" style="width:38px;height:38px;line-height:1"
+        (click)="cantidadSeleccionada = cantidadSeleccionada > 1 ? cantidadSeleccionada - 1 : 1">−</button>
+      <span class="fw-bold fs-5">{{ cantidadSeleccionada }}</span>
+      <button class="btn btn-outline-secondary rounded-circle fw-bold" style="width:38px;height:38px;line-height:1"
+        (click)="cantidadSeleccionada = cantidadSeleccionada + 1">+</button>
+    </div>
+
+    <!-- Nota para cocina -->
+    <p class="fw-semibold small mb-1">Nota para cocina <span class="text-muted">(opcional)</span>:</p>
+    <textarea
+      class="form-control form-control-sm rounded-3 mb-4"
+      rows="2"
+      placeholder="Ej: Sin salsa de tomate, término medio..."
+      [(ngModel)]="notaSeleccionada"
+      maxlength="120">
+    </textarea>
+
+    <!-- Acciones -->
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary rounded-3 fw-semibold flex-fill" (click)="cerrarModalProducto()">Cancelar</button>
+      <button class="btn btn-premium rounded-3 fw-bold flex-fill" (click)="confirmarAgregarProducto()">
+        <span *ngIf="guardando" class="spinner-border spinner-border-sm me-1"></span>
+        Agregar
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <!-- ═══ MODAL LIBERAR MESA (sin consumo) ══════════════════════════════════ -->
 <div *ngIf="mostrarModalLiberar" class="modal-overlay" (click)="cerrarModalLiberar()">
   <div class="modal-cobro modal-liberar rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()">
@@ -112,7 +158,7 @@
     <!-- Lista de productos (1 columna en mobile, 2 en desktop) -->
     <div class="row g-2" *ngIf="!cargando">
       <div class="col-6" *ngFor="let p of productosFiltrados">
-        <div class="card border-0 rounded-3 producto-card h-100" (click)="agregarProducto(p)">
+        <div class="card border-0 rounded-3 producto-card h-100" (click)="abrirModalProducto(p)">
           <div class="card-body p-2 d-flex flex-column align-items-center text-center">
             <div class="producto-emoji mb-1">🥩</div>
             <p class="fw-semibold mb-0 small text-dark lh-sm">{{ p.name }}</p>
@@ -225,6 +271,7 @@
               class="badge bg-info bg-opacity-10 text-info" style="font-size: 0.65rem;">🥤 Directo</span>
           </div>
           <p class="text-muted mb-0 small">{{ item.quantity }} × ${{ item.unitPrice | number:'1.2-2' }}</p>
+          <p *ngIf="item.notes" class="mb-0 mt-1" style="font-size:0.75rem; color:#e44; font-style:italic;">📝 {{ item.notes }}</p>
         </div>
         <!-- Subtotal -->
         <span class="fw-bold">${{ item.subtotal | number:'1.2-2' }}</span>

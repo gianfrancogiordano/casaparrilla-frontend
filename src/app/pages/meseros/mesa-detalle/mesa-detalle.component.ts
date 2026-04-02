@@ -40,6 +40,12 @@ export class MesaDetalleComponent implements OnInit {
   error = '';
   mensaje = '';
 
+  // Modal de producto (cantidad + nota)
+  mostrarModalProducto = false;
+  productoSeleccionado: Product | null = null;
+  cantidadSeleccionada = 1;
+  notaSeleccionada = '';
+
   // Modal de cobro
   mostrarModalCobro = false;
   metodoPago: MetodoPago = 'Efectivo';
@@ -121,9 +127,29 @@ export class MesaDetalleComponent implements OnInit {
     this.productosFiltrados = lista;
   }
 
+  // ─── Mini-modal de producto ─────────────────────────────────────────────────
+
+  abrirModalProducto(producto: Product): void {
+    this.productoSeleccionado = producto;
+    this.cantidadSeleccionada = 1;
+    this.notaSeleccionada = '';
+    this.mostrarModalProducto = true;
+  }
+
+  cerrarModalProducto(): void {
+    this.mostrarModalProducto = false;
+    this.productoSeleccionado = null;
+  }
+
+  confirmarAgregarProducto(): void {
+    if (!this.productoSeleccionado) return;
+    this.mostrarModalProducto = false;
+    this.agregarProducto(this.productoSeleccionado, this.cantidadSeleccionada, this.notaSeleccionada.trim() || undefined);
+  }
+
   // ─── Agregar / Quitar items ──────────────────────────────────────────────────
 
-  agregarProducto(producto: Product, cantidad = 1): void {
+  agregarProducto(producto: Product, cantidad = 1, nota?: string): void {
     const user = this.authService.getCurrentUser();
     this.guardando = true;
 
@@ -134,6 +160,7 @@ export class MesaDetalleComponent implements OnInit {
       unitPrice: producto.sellPrice,
       subtotal: cantidad * producto.sellPrice,
       requiresKitchen: producto.requiresKitchen ?? true,
+      notes: nota,
     };
 
     const onSuccess = (orden: Order) => {
