@@ -1,9 +1,11 @@
 {
-  "name": "frontend",
-  "short_name": "frontend",
+  "name": "Casa Parrilla",
+  "short_name": "Parrilla",
+  "theme_color": "#b12929",
+  "background_color": "#ffffff",
   "display": "standalone",
-  "scope": "./",
-  "start_url": "./",
+  "scope": "/",
+  "start_url": "/",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
