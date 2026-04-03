@@ -35,6 +35,12 @@ export class SidebarComponent implements OnInit {
       roles: ['Administrador', 'Mesero'],
     },
     {
+      label: 'Delivery',
+      icon: '🛵',
+      route: '/delivery',
+      roles: ['Administrador'],
+    },
+    {
       label: 'Pedidos',
       icon: '🛒',
       route: '/pedidos',
@@ -93,7 +99,7 @@ export class SidebarComponent implements OnInit {
 
   /** Items de operación visibles */
   get operacionItems(): NavItem[] {
-    const operacion = ['Dashboard', 'Meseros', 'Pedidos'];
+    const operacion = ['Dashboard', 'Meseros', 'Delivery', 'Pedidos'];
     return this.menuItems.filter((i) => operacion.includes(i.label));
   }
 

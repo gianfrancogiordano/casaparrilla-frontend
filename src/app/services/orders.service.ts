@@ -22,6 +22,8 @@ export interface Order {
   table: string;
   waiterId: any;
   clientId?: any; // New field for VIP client
+  customerPhone?: string;
+  deliveryAddress?: string;
   items: OrderItem[];
   totals: { subtotal: number; taxes: number; total: number };
   paymentInfo: { status: string; method?: string };

@@ -167,9 +167,11 @@
   font-weight: 700;
   white-space: nowrap;
 
+  &.s-recibido  { background: rgba(59,130,246,0.15);  color: #1d4ed8; } // Blue for Web
   &.s-abierta   { background: rgba(251,191,36,0.15);  color: #b45309; }
   &.s-cocina    { background: rgba(239,68,68,0.12);   color: #dc2626; }
   &.s-lista     { background: rgba(99,102,241,0.15);  color: #4f46e5; }
+  &.s-camino    { background: rgba(245,158,11,0.15);  color: #d97706; } // Amber/Orange
   &.s-pagado    { background: rgba(16,185,129,0.15);  color: #047857; }
   &.s-cancelado { background: rgba(107,114,128,0.15); color: #374151; }
 }
@@ -211,9 +213,11 @@
 .shadow-xl { box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important; }
 
 .modal-header {
+  &.h-recibido  { background: linear-gradient(135deg, #3b82f6, #2563eb); }
   &.h-abierta   { background: linear-gradient(135deg, #f59e0b, #d97706); }
   &.h-cocina    { background: linear-gradient(135deg, #ef4444, #dc2626); }
   &.h-lista     { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+  &.h-camino    { background: linear-gradient(135deg, #f59e0b, #ea580c); }
   &.h-pagado    { background: linear-gradient(135deg, #10b981, #059669); }
   &.h-cancelado { background: linear-gradient(135deg, #6b7280, #4b5563); }
 }

@@ -51,11 +51,11 @@ export class MesaDetalleComponent implements OnInit {
   metodoPago: MetodoPago = 'Efectivo';
   metodos: MetodoPago[] = ['Efectivo', 'Pago Movil', 'Binance', 'Bancolombia', 'Zelle'];
   metodosIconos: Record<MetodoPago, string> = {
-    'Efectivo':   '💵',
+    'Efectivo': '💵',
     'Pago Movil': '📲',
-    'Binance':    '🟡',
-    'Bancolombia':'🏦',
-    'Zelle':      '💜',
+    'Binance': '🟡',
+    'Bancolombia': '🏦',
+    'Zelle': '💜',
   };
 
   // Gestión de Clientes VIP
@@ -72,10 +72,10 @@ export class MesaDetalleComponent implements OnInit {
     private productsService: ProductsService,
     private configuracionService: ConfiguracionService,
     private authService: AuthService,
-    public  printerService: ThermalPrinterService,
+    public printerService: ThermalPrinterService,
     private clientsService: ClientsService,
     private alertService: AlertService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.mesaNumero = this.route.snapshot.paramMap.get('numero') ?? '1';
@@ -297,7 +297,6 @@ export class MesaDetalleComponent implements OnInit {
       next: () => {
         this.liberando = false;
         this.mostrarModalLiberar = false;
-        this.alertService.success('Mesa liberada correctamente.');
         setTimeout(() => this.router.navigate(['/meseros']), 1200);
       },
       error: () => {
@@ -336,7 +335,7 @@ export class MesaDetalleComponent implements OnInit {
       return;
     }
     this.clientsService.getAll().subscribe(data => {
-      this.clientesEncontrados = data.filter(c => 
+      this.clientesEncontrados = data.filter(c =>
         c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term))
       );
     });

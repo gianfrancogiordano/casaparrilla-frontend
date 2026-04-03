@@ -218,9 +218,11 @@ export class PedidosComponent implements OnInit {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
+      'Recibido':   's-recibido',
       'Abierta':    's-abierta',
       'En Cocina':  's-cocina',
       'Lista':      's-lista',
+      'En Camino':  's-camino',
       'Pagado':     's-pagado',
       'Cancelado':  's-cancelado',
     };
@@ -229,9 +231,11 @@ export class PedidosComponent implements OnInit {
 
   getStatusHeaderClass(status: string): string {
     const map: Record<string, string> = {
+      'Recibido':   'h-recibido',
       'Abierta':    'h-abierta',
       'En Cocina':  'h-cocina',
       'Lista':      'h-lista',
+      'En Camino':  'h-camino',
       'Pagado':     'h-pagado',
       'Cancelado':  'h-cancelado',
     };

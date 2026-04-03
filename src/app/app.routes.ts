@@ -10,6 +10,7 @@ import { ProductosComponent } from './pages/productos/productos.component';
 import { PedidosComponent } from './pages/pedidos/pedidos.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { ClientesComponent } from './pages/clientes/clientes.component';
+import { DeliveryComponent } from './pages/delivery/delivery.component'; // Import DeliveryComponent
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -21,6 +22,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'delivery', component: DeliveryComponent }, // Add delivery route
       { path: 'meseros', component: MeserosComponent },
       { path: 'meseros/:numero', component: MesaDetalleComponent },
       { path: 'inventario', component: InventarioComponent },

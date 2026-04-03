@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ConfiguracionService, Configuracion } from '../../services/configuracion.service';
 import { OrdersService, Order } from '../../services/orders.service';
+import { SocketService } from '../../services/socket.service';
 import { AuthService } from '../../services/auth.service';
-import { forkJoin, map, of, catchError } from 'rxjs';
+import { Subscription, forkJoin, map, of, catchError } from 'rxjs';
 
 export interface MesaState {
   numero: number;
@@ -15,25 +16,39 @@ export interface MesaState {
 
 @Component({
   selector: 'app-meseros',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './meseros.component.html',
   styleUrl: './meseros.component.scss',
 })
-export class MeserosComponent implements OnInit {
+export class MeserosComponent implements OnInit, OnDestroy {
   config: Configuracion | null = null;
   mesas: MesaState[] = [];
   cargando = true;
   error = '';
+  
+  // Delivery
+  pendingDeliveriesCount = 0;
+  private socketSubCreated?: Subscription;
+  private socketSubUpdated?: Subscription;
 
   constructor(
     private configuracionService: ConfiguracionService,
     private ordersService: OrdersService,
+    private socketService: SocketService,
     private authService: AuthService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.cargarMesas();
+    this.cargarDeliveries();
+    this.setupWebSockets();
+  }
+
+  ngOnDestroy(): void {
+    this.socketSubCreated?.unsubscribe();
+    this.socketSubUpdated?.unsubscribe();
   }
 
   cargarMesas(): void {
@@ -81,7 +96,39 @@ export class MeserosComponent implements OnInit {
     this.router.navigate(['/meseros', mesa.numero]);
   }
 
+  goToDelivery(): void {
+    this.router.navigate(['/delivery']);
+  }
+
   getMesaStatus(mesa: MesaState): 'libre' | 'ocupada' {
     return mesa.orden ? 'ocupada' : 'libre';
+  }
+
+  // --- Delivery Tracking ---
+  cargarDeliveries(): void {
+    this.ordersService.getAll().subscribe({
+      next: (orders) => {
+        this.pendingDeliveriesCount = orders.filter(o => 
+          o.orderType === 'Delivery' && 
+          o.status !== 'Pagado' && 
+          o.status !== 'Cancelado'
+        ).length;
+      }
+    });
+  }
+
+  setupWebSockets(): void {
+    this.socketSubCreated = this.socketService.onOrderCreated().subscribe((newOrder: Order) => {
+      if (newOrder.orderType === 'Delivery') {
+        this.pendingDeliveriesCount++;
+      }
+    });
+
+    this.socketSubUpdated = this.socketService.onOrderUpdated().subscribe((updatedOrder: Order) => {
+      // Reload count fully on update to be safe and accurate
+      if (updatedOrder.orderType === 'Delivery') {
+        this.cargarDeliveries();
+      }
+    });
   }
 }

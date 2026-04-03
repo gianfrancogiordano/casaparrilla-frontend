@@ -1,0 +1,151 @@
+<div class="delivery-dashboard">
+  <header class="header">
+    <div class="header-content">
+      <h1 class="title">Centro de Control Delivery</h1>
+      <p class="subtitle">Monitoreo en tiempo real de pedidos activos</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="stats me-3">
+        <div class="stat-card">
+          <span class="stat-value">{{ deliveryOrders.length }}</span>
+          <span class="stat-label">Pedidos activos</span>
+        </div>
+      </div>
+
+      <!-- 🖨️ Impresora -->
+      <button *ngIf="!printerService.conectado()"
+        class="btn btn-sm btn-outline-secondary rounded-3 printer-btn"
+        (click)="printerService.conectar()">
+        🖨️ Conectar
+      </button>
+      <span *ngIf="printerService.conectado()"
+        class="badge printer-badge-on rounded-3 px-3 py-2"
+        (click)="printerService.desconectar()"
+        title="Toca para desconectar">
+        🖨️ {{ printerService.nombreImpresora() }}
+      </span>
+    </div>
+  </header>
+
+  <div class="grid-container" *ngIf="deliveryOrders.length > 0; else noOrders">
+    <div class="order-card" *ngFor="let order of deliveryOrders" [ngClass]="getUrgencyClass(order.createdAt)">
+      <div class="card-header">
+        <span class="order-number">#{{ order.orderNumber }}</span>
+        <span class="order-status badge" [attr.data-status]="order.status">
+          {{ order.status }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="client-info">
+          <h3 class="client-name">{{ order.clientId?.name || 'Cliente Genérico' }}</h3>
+          <p class="client-phone"><i class="bi bi-telephone"></i> {{ order.customerPhone || order.clientId?.phone || 'N/A' }}</p>
+          <p class="client-address"><i class="bi bi-geo-alt"></i> {{ order.deliveryAddress || order.clientId?.address || 'Sin dirección' }}</p>
+        </div>
+
+        <div class="order-items">
+          <p class="items-count">{{ order.items.length }} ítems - <strong>{{ order.totals.total | currency }}</strong></p>
+          <ul class="item-list">
+            <li *ngFor="let item of order.items">
+              <span class="item-qty">{{ item.quantity }}x</span>
+              <span class="item-name">{{ item.productName }}</span>
+              <span class="item-price" *ngIf="item.subtotal">{{ item.subtotal | currency }}</span>
+              <div *ngIf="item.notes" class="mt-1" style="font-size:0.72rem; color:#e44; font-style:italic; border-left: 2px solid #e44; padding-left: 8px; margin-left: 32px;">
+                📝 {{ item.notes }}
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="timer-section">
+          <div class="timer-icon">
+            <i class="bi bi-clock"></i>
+          </div>
+          <div class="timer-info">
+            <span class="timer-value">{{ getElapsedTime(order.createdAt) }} min</span>
+            <span class="timer-label">Esperando</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="card-footer" *ngIf="getNextStatus(order.status) as next">
+        <button class="btn-action" 
+          (click)="onAction(order)"
+          [disabled]="!next">
+          Pasar a: {{ next }}
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <ng-template #noOrders>
+    <div class="empty-state">
+      <div class="empty-icon">🛵</div>
+      <h2>No hay pedidos de delivery activos</h2>
+      <p>Los nuevos pedidos aparecerán aquí automáticamente.</p>
+    </div>
+  </ng-template>
+
+  <!-- ═══ MODAL DE COBRO (overlay) ═══════════════════════════════════════════ -->
+  <div *ngIf="mostrarModalCobro && ordenAProcesar" class="modal-overlay" (click)="cerrarModalCobro()">
+    <div class="modal-cobro rounded-4 shadow-lg p-4" (click)="$event.stopPropagation()">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="fw-bold mb-0">💳 Cobrar Pedido #{{ ordenAProcesar.orderNumber }}</h5>
+        <button class="btn btn-sm btn-link text-muted p-0" (click)="cerrarModalCobro()">✕</button>
+      </div>
+
+      <!-- Cliente y Dirección Info -->
+      <div class="alert alert-light border rounded-3 py-2 px-3 mb-3">
+        <div class="fw-bold text-dark mb-1">{{ ordenAProcesar.clientId?.name || 'Cliente Genérico' }}</div>
+        <div class="small text-muted">{{ ordenAProcesar.deliveryAddress || ordenAProcesar.clientId?.address || 'Sin dirección registrada' }}</div>
+      </div>
+
+      <!-- Resumen -->
+      <div class="resumen-items mb-3">
+        <div *ngFor="let item of ordenAProcesar.items" class="py-1 border-bottom">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="small text-dark">{{ item.quantity }}× {{ item.productName }}</span>
+            <span class="small fw-semibold">${{ item.subtotal | number:'1.2-2' }}</span>
+          </div>
+          <p *ngIf="item.notes" class="mb-0 mt-1" style="font-size:0.72rem; color:#e44; font-style:italic;">
+            📝 {{ item.notes }}
+          </p>
+        </div>
+      </div>
+
+      <div class="totales-box rounded-3 p-3 mb-4" *ngIf="config">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-muted small">Total USD</span>
+          <span class="fw-bold fs-5 text-danger">${{ ordenAProcesar.totals.total | number:'1.2-2' }}</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-muted small">En Bolívares (BS)</span>
+          <span class="fw-semibold text-dark">Bs. {{ totalBs | number:'1.2-2' }}</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted small">En Pesos (COP)</span>
+          <span class="fw-semibold text-dark">$ {{ totalCop | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <p class="fw-semibold small mb-2">Método de pago:</p>
+      <div class="metodos-grid mb-4">
+        <button
+          *ngFor="let m of metodos"
+          class="btn btn-metodo"
+          [class.btn-metodo-active]="metodoPago === m"
+          (click)="metodoPago = m">
+          <span class="fs-4 d-block mb-1">{{ metodosIconos[m] }}</span>
+          <span class="small fw-semibold lh-sm">{{ m }}</span>
+        </button>
+      </div>
+
+      <button class="btn btn-premium-action w-100 py-3 rounded-3 fw-bold fs-6"
+        [disabled]="cobrando" (click)="confirmarCobro()">
+        <span *ngIf="cobrando" class="spinner-border spinner-border-sm me-2"></span>
+        {{ cobrando ? 'Procesando...' : '✔ Confirmar Cobro — ' + metodoPago }}
+      </button>
+    </div>
+  </div>
+</div>
