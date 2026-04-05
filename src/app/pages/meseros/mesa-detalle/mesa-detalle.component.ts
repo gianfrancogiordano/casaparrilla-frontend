@@ -274,7 +274,10 @@ export class MesaDetalleComponent implements OnInit {
             .then(() => this.alertService.toast(`🍳 ${pendientes.length} item(s) enviados a cocina`, 'success'))
             .catch(() => this.alertService.toast(`⚠️ Falla en impresora`, 'warning'));
         } else {
-          this.alertService.toast(`🍳 ${pendientes.length} item(s) enviados (sin impresión)`, 'info');
+          // DEBUG: Ver ticket en consola si no hay impresora
+          const ordenParcial = { ...orden, items: pendientes };
+          this.printerService.verTicketEnConsola(ordenParcial, this.mesaNumero);
+          this.alertService.toast(`🍳 ${pendientes.length} item(s) enviados (Ticket en consola)`, 'info');
         }
       },
       error: () => { this.guardando = false; this.alertService.error('Error al enviar a cocina.'); },

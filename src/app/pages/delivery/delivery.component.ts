@@ -156,6 +156,11 @@ export class DeliveryComponent implements OnInit, OnDestroy {
               const ordenParcial = { ...updatedOrder, items: itemsParaCocina };
               this.printerService.imprimirComanda(ordenParcial, 'DELIVERY')
                 .catch(() => this.alertService.toast(`⚠️ Falla en impresora`, 'warning'));
+            } else {
+              // DEBUG: Ver ticket en consola si no hay impresora
+              const ordenParcial = { ...updatedOrder, items: itemsParaCocina };
+              this.printerService.verTicketEnConsola(ordenParcial, 'DELIVERY');
+              this.alertService.toast(`Ticket generado en consola (Debug)`, 'info');
             }
           },
           error: () => this.alertService.error('Error al enviar a cocina')

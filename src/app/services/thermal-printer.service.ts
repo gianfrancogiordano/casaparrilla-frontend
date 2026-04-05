@@ -96,10 +96,87 @@ export class ThermalPrinterService {
 
   async imprimirComanda(orden: Order, mesa: string): Promise<void> {
     if (!this.writer) {
-      throw new Error('Impresora no conectada.');
+      // Si no está conectada, lo enviamos a consola para debug
+      this.verTicketEnConsola(orden, mesa);
+      console.warn('[ThermalPrinter] Impresora no conectada. Ticket enviado a consola para debug.');
+      return;
     }
     const bytes = this._generarTicket(orden, mesa);
     await this._enviarEnChunks(bytes);
+  }
+
+  /**
+   * Genera una representación visual del ticket en la consola (DEBUG)
+   */
+  verTicketEnConsola(orden: Order, mesa: string): void {
+    const ahora = new Date();
+    const hora  = ahora.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    const fecha = ahora.toLocaleDateString('es', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+    console.group('%c 🧾 TICKET DE IMPRESIÓN (DEBUG) ', 'background: #333; color: #00ff00; font-weight: bold; padding: 2px;');
+    console.log('%cWidth: 32 chars', 'color: #888; font-style: italic;');
+    console.log('='.repeat(COLUMNS));
+    console.log(this._centerText('*** COCINA ***', COLUMNS));
+    console.log('='.repeat(COLUMNS));
+    console.log(`MESA: ${mesa}`);
+    console.log(`Hora: ${hora}   ${fecha}`);
+    console.log(`Ord:  ${orden.orderNumber}`);
+    console.log('-'.repeat(COLUMNS));
+
+    for (const item of orden.items) {
+      const qty = `${item.quantity}x`.padEnd(5);
+      const lineas = this._wrapText(item.productName.toUpperCase(), COLUMNS - 6);
+      
+      console.log(`${qty} ${lineas[0]}`);
+      for (let i = 1; i < lineas.length; i++) {
+        console.log(`      ${lineas[i]}`);
+      }
+
+      if (item.notes) {
+        const lineasNotas = this._wrapText(item.notes, COLUMNS - 8);
+        for (const ln of lineasNotas) {
+          console.log(`      > ${ln}`);
+        }
+      }
+    }
+
+    console.log('='.repeat(COLUMNS));
+    const footer = `${orden.items.length} item${orden.items.length !== 1 ? 's' : ''}`;
+    console.log(this._centerText(footer, COLUMNS));
+    console.log('='.repeat(COLUMNS));
+    console.groupEnd();
+  }
+
+  private _centerText(text: string, width: number): string {
+    if (text.length >= width) return text;
+    const side = Math.floor((width - text.length) / 2);
+    return ' '.repeat(side) + text + ' '.repeat(width - text.length - side);
+  }
+
+  /**
+   * Divide un texto en múltiples líneas sin romper palabras si es posible.
+   */
+  private _wrapText(text: string, width: number): string[] {
+    if (!text) return [];
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      if ((currentLine + (currentLine ? ' ' : '') + word).length <= width) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+        // Si una palabra sola es más ancha que el máximo, la picamos por fuerza bruta
+        while (currentLine.length > width) {
+          lines.push(currentLine.substring(0, width));
+          currentLine = currentLine.substring(width);
+        }
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines;
   }
 
   // ─── Generación del ticket ESC/POS ─────────────────────────────────────────
@@ -151,12 +228,21 @@ export class ThermalPrinterService {
 
     for (const item of orden.items) {
       const maxNombre = COLUMNS - 6;
-      const nombre = item.productName.length > maxNombre
-        ? item.productName.substring(0, maxNombre - 1) + '.'
-        : item.productName;
-      ticket.bold(true).text(`  ${item.quantity}x`).bold(false).line(`  ${safe(nombre)}`);
+      const lineasNombre = this._wrapText(safe(item.productName), maxNombre);
+      
+      // Primera línea con la cantidad
+      ticket.bold(true).text(`  ${item.quantity}x`).bold(false).line(`  ${lineasNombre[0]}`);
+      
+      // Líneas subsiguientes indentadas
+      for (let i = 1; i < lineasNombre.length; i++) {
+        ticket.line(`      ${lineasNombre[i]}`);
+      }
+
       if (item.notes) {
-        ticket.line(`      > ${safe(item.notes)}`);
+        const lineasNotas = this._wrapText(safe(item.notes), COLUMNS - 8);
+        for (const ln of lineasNotas) {
+          ticket.line(`      > ${ln}`);
+        }
       }
     }
 
