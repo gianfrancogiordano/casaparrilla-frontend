@@ -229,7 +229,7 @@
               <div>
                 <div class="fw-bold">{{ c.name }}</div>
                 <div class="small text-muted">{{ c.phone }}</div>
-                <div class="x-small text-muted" *ngIf="c.addresses?.length">{{ c.addresses[0].street }}</div>
+                <div class="x-small text-muted" *ngIf="c.addresses.length">{{ c.addresses[0].street }}</div>
               </div>
               <span class="badge bg-primary rounded-pill">{{ c.loyaltyPoints || 0 }} pts</span>
             </button>
