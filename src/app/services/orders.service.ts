@@ -38,6 +38,9 @@ export interface CreateOrderPayload {
   waiterId: string;
   items: OrderItem[];
   totals: { subtotal: number; taxes: number; total: number };
+  customerPhone?: string;
+  deliveryAddress?: string;
+  clientId?: string;
 }
 
 @Injectable({ providedIn: 'root' })

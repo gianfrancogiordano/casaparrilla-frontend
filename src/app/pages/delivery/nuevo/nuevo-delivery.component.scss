@@ -1,0 +1,95 @@
+.mesa-detalle-page {
+  position: relative;
+  min-height: calc(100vh - 60px);
+  background: var(--bg-color);
+
+  .header-fixed {
+    position: sticky;
+    top: 0;
+    background: var(--bg-color);
+    z-index: 10;
+    padding-top: 15px;
+    padding-bottom: 10px;
+  }
+
+  .order-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    
+    .order-item-card {
+      background: #fff;
+      border-radius: 1rem;
+      padding: 12px 16px;
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+      
+      &:active {
+        transform: scale(0.98);
+      }
+    }
+  }
+
+  .footer-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 15px 20px;
+    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+    z-index: 1020;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    
+    .action-btn {
+      min-width: 160px;
+    }
+  }
+
+  .dashed {
+    border-style: dashed !important;
+    border-width: 2px !important;
+    border-color: rgba(0,0,0,0.1) !important;
+  }
+}
+
+// Ocultar scrollbar visual
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.category-pills {
+  .btn {
+    border-color: rgba(0,0,0,0.1);
+    &.btn-dark {
+      border-color: var(--bs-dark);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+  }
+}
+
+.product-card {
+  cursor: pointer;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  transition: all 0.2s ease-out;
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+.btn-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}

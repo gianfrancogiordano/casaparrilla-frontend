@@ -6,7 +6,7 @@ import { SocketService } from '../../services/socket.service';
 import { AlertService } from '../../services/alert.service';
 import { ThermalPrinterService } from '../../services/thermal-printer.service';
 import { ConfiguracionService, Configuracion } from '../../services/configuracion.service';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 
 type MetodoPago = 'Efectivo' | 'Pago Movil' | 'Binance' | 'Bancolombia' | 'Zelle';
@@ -14,7 +14,7 @@ type MetodoPago = 'Efectivo' | 'Pago Movil' | 'Binance' | 'Bancolombia' | 'Zelle
 @Component({
   selector: 'app-delivery',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DecimalPipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, DecimalPipe, RouterModule],
   templateUrl: './delivery.component.html',
   styleUrl: './delivery.component.scss'
 })

@@ -13,6 +13,12 @@
         </div>
       </div>
 
+      <button
+        class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm me-2 fw-semibold"
+        routerLink="/delivery/nuevo">
+        <span class="me-1">+</span> Nuevo Pedido
+      </button>
+
       <!-- 🖨️ Impresora -->
       <button *ngIf="!printerService.conectado()"
         class="btn btn-sm btn-outline-secondary rounded-3 printer-btn"

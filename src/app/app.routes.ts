@@ -22,7 +22,8 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'delivery', component: DeliveryComponent }, // Add delivery route
+      { path: 'delivery', component: DeliveryComponent },
+      { path: 'delivery/nuevo', loadComponent: () => import('./pages/delivery/nuevo/nuevo-delivery.component').then(m => m.NuevoDeliveryComponent) },
       { path: 'meseros', component: MeserosComponent },
       { path: 'meseros/:numero', component: MesaDetalleComponent },
       { path: 'inventario', component: InventarioComponent },
