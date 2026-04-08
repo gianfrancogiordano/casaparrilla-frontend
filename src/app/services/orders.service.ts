@@ -60,6 +60,14 @@ export class OrdersService {
     return this.http.post<Order>(this.API, payload);
   }
 
+  findOne(id: string): Observable<Order> {
+    return this.http.get<Order>(`${this.API}/${id}`);
+  }
+
+  updateOrder(id: string, payload: any): Observable<Order> {
+    return this.http.patch<Order>(`${this.API}/${id}`, payload);
+  }
+
   addItemToOrder(orderId: string, item: Partial<OrderItem>): Observable<Order> {
     return this.http.post<Order>(`${this.API}/${orderId}/items`, item);
   }

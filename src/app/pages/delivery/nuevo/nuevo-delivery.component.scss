@@ -4,8 +4,7 @@
   background: var(--bg-color);
 
   .header-fixed {
-    position: sticky;
-    top: 0;
+    position: relative;
     background: var(--bg-color);
     z-index: 10;
     padding-top: 15px;
@@ -44,7 +43,9 @@
     border-top-right-radius: 24px;
     
     .action-btn {
-      min-width: 160px;
+      @media (min-width: 480px) {
+        min-width: 160px;
+      }
     }
   }
 

@@ -189,6 +189,24 @@ export class DeliveryComponent implements OnInit, OnDestroy {
     }
   }
 
+  async onCancel(order: Order): Promise<void> {
+    const confirm = await this.alertService.confirm(
+      'Cancelar Pedido',
+      `¿Estás seguro de que deseas cancelar el pedido #${order.orderNumber}?`,
+      'Sí, Cancelar'
+    );
+    
+    if (confirm) {
+      this.ordersService.cancelOrder(order._id).subscribe({
+        next: () => {
+          this.alertService.toast(`Pedido #${order.orderNumber} cancelado`);
+          this.deliveryOrders = this.deliveryOrders.filter(o => o._id !== order._id);
+        },
+        error: () => this.alertService.error('Error al cancelar el pedido')
+      });
+    }
+  }
+
   // ─── Modal de cobro ─────────────────────────────────────────────────────────
 
   abrirModalCobro(order: Order): void {

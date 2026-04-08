@@ -1,7 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { OrdersService, OrderItem } from '../../../services/orders.service';
 import { ProductsService, Product } from '../../../services/products.service';
 import { ConfiguracionService, Configuracion } from '../../../services/configuracion.service';
@@ -32,6 +32,10 @@ export class NuevoDeliveryComponent implements OnInit {
   cargando = true;
   guardando = false;
 
+  isEditMode = false;
+  orderIdToEdit: string | null = null;
+  orderNumberToEdit: string | null = null;
+
   // Carrito de compras local
   items: OrderItem[] = [];
 
@@ -55,6 +59,7 @@ export class NuevoDeliveryComponent implements OnInit {
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private ordersService: OrdersService,
     private productsService: ProductsService,
     private configuracionService: ConfiguracionService,
@@ -64,22 +69,38 @@ export class NuevoDeliveryComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.cargarDatos();
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.isEditMode = true;
+        this.orderIdToEdit = id;
+      }
+      this.cargarDatos();
+    });
   }
 
   cargarDatos(): void {
     this.cargando = true;
-    forkJoin({
+    const reqs: any = {
       productos: this.productsService.getAll(),
       config: this.configuracionService.get(),
-    }).subscribe({
-      next: ({ productos, config }) => {
-        this.config = config;
-        this.productos = productos.filter((p) => p.available);
+    };
+    if (this.isEditMode && this.orderIdToEdit) {
+      reqs.order = this.ordersService.findOne(this.orderIdToEdit);
+    }
+
+    forkJoin(reqs).subscribe({
+      next: (results: any) => {
+        this.config = results.config;
+        this.productos = results.productos.filter((p: any) => p.available);
         this.productosFiltrados = this.productos;
 
-        const cats = [...new Set(productos.map((p: Product) => p.category ?? 'Sin categoría').filter(Boolean))] as string[];
+        const cats = [...new Set(this.productos.map((p: Product) => p.category ?? 'Sin categoría').filter(Boolean))] as string[];
         this.categorias = ['Todos', ...cats];
+
+        if (results.order) {
+          this.precargarOrden(results.order);
+        }
 
         this.cargando = false;
       },
@@ -88,6 +109,16 @@ export class NuevoDeliveryComponent implements OnInit {
         this.alertService.error('Error al cargar datos del sistema.'); 
       },
     });
+  }
+
+  precargarOrden(order: any): void {
+    this.orderNumberToEdit = order.orderNumber;
+    this.items = [...order.items];
+    this.customerPhone = order.customerPhone || '';
+    this.deliveryAddress = order.deliveryAddress || '';
+    if (order.clientId && order.clientId._id) {
+      this.clienteVinculado = order.clientId;
+    }
   }
 
   abrirCatalogo(): void {
@@ -191,38 +222,55 @@ export class NuevoDeliveryComponent implements OnInit {
     this.guardando = true;
     const user = this.authService.getCurrentUser();
 
-    // Payload de nueva orden
+    // Payload base (aplica crear o actualizar)
     const payload: any = {
-      orderNumber: `DEL-${Date.now()}`,
-      status: 'Recibido',
-      orderType: 'Delivery',
-      table: 'WhatsApp', // Or just Externo
-      waiterId: user?.id,
       items: this.items,
       totals: { subtotal: this.subtotal, taxes: 0, total: this.subtotal }
     };
 
     if (this.clienteVinculado) {
       payload.clientId = this.clienteVinculado._id;
-      // Also apply the phone/address from the linked client if they are lacking in inputs
       payload.customerPhone = this.customerPhone || this.clienteVinculado.phone;
       payload.deliveryAddress = this.deliveryAddress || (this.clienteVinculado.addresses?.length ? this.clienteVinculado.addresses[0].street : '');
     } else {
+      payload.clientId = null;
       payload.customerPhone = this.customerPhone;
       payload.deliveryAddress = this.deliveryAddress;
     }
 
-    this.ordersService.createOrder(payload).subscribe({
-      next: () => {
-        this.guardando = false;
-        this.alertService.success('¡Pedido de Delivery creado con éxito!');
-        this.router.navigate(['/delivery']);
-      },
-      error: () => {
-        this.guardando = false;
-        this.alertService.error('Error al crear el pedido.');
-      }
-    });
+    if (this.isEditMode && this.orderIdToEdit) {
+      // MODO EDICIÓN
+      this.ordersService.updateOrder(this.orderIdToEdit, payload).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.alertService.success('¡Pedido de Delivery actualizado con éxito!');
+          this.router.navigate(['/delivery']);
+        },
+        error: () => {
+          this.guardando = false;
+          this.alertService.error('Error al actualizar el pedido.');
+        }
+      });
+    } else {
+      // MODO CREACIÓN
+      payload.orderNumber = `DEL-${Date.now()}`;
+      payload.status = 'Recibido';
+      payload.orderType = 'Delivery';
+      payload.table = 'WhatsApp';
+      payload.waiterId = user?.id;
+
+      this.ordersService.createOrder(payload).subscribe({
+        next: () => {
+          this.guardando = false;
+          this.alertService.success('¡Pedido de Delivery creado con éxito!');
+          this.router.navigate(['/delivery']);
+        },
+        error: () => {
+          this.guardando = false;
+          this.alertService.error('Error al crear el pedido.');
+        }
+      });
+    }
   }
 
   // --- Manejo de Clientes VIP ---

@@ -6,8 +6,8 @@
       <i class="opacity-75">⬅️</i>
     </button>
     <div>
-      <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
-        🛵 Nuevo Delivery
+      <h5 class="fw-bold mb-0 text-dark d-flex align-items-center text-break">
+        {{ isEditMode ? '✏️ Editar Delivery ' + (orderNumberToEdit ? '#' + orderNumberToEdit : '') : '🛵 Nuevo Delivery' }}
       </h5>
       <p class="text-muted small mb-0">Atención WhatsApp / Externa</p>
     </div>
@@ -91,19 +91,22 @@
 
   <!-- ══ FOOTER FIJO (TOTALES Y ACCIONES) ═════════════════════════════════ -->
   <div class="footer-actions bg-white" *ngIf="items.length > 0">
-    <div class="d-flex justify-content-between align-items-end mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-2">
       <div class="totals-info">
         <div class="text-muted small fw-bold text-uppercase mb-1">Total a Pagar</div>
-        <div class="fw-bold text-primary display-6 lh-1 mb-1">{{ subtotal | currency }}</div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="fw-bold text-primary fs-3 lh-1 mb-1">{{ subtotal | currency }}</div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
           <span class="badge bg-light text-dark border">Bs {{ totalBs | number:'1.2-2' }}</span>
           <span class="badge bg-light text-dark border">COP {{ totalCop | number:'1.0-0' }}</span>
         </div>
       </div>
-      <div>
-        <button class="btn btn-primary btn-lg rounded-4 px-4 shadow-sm fw-bold action-btn" 
-                (click)="crearPedidoDelivery()" [disabled]="guardando">
-          <span *ngIf="!guardando">Crear Pedido 🛵</span>
+      <div class="flex-shrink-0">
+        <button class="btn btn-primary rounded-4 px-3 py-2 shadow-sm fw-bold action-btn d-flex flex-column align-items-center justify-content-center" 
+                (click)="crearPedidoDelivery()" [disabled]="guardando" style="min-height: 3.5rem;">
+          <ng-container *ngIf="!guardando">
+            <span class="d-block lh-1 mb-1">{{ isEditMode ? 'Guardar' : 'Crear' }}</span>
+            <span class="d-block lh-1">{{ isEditMode ? 'Cambios 💾' : 'Pedido 🛵' }}</span>
+          </ng-container>
           <span *ngIf="guardando" class="spinner-border spinner-border-sm"></span>
         </button>
       </div>
