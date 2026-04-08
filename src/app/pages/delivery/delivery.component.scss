@@ -30,13 +30,10 @@
     .header-actions {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      width: 100%;
+      justify-content: flex-end;
       gap: 1rem;
 
       @media (min-width: 768px) {
-        width: auto;
-        justify-content: flex-end;
         gap: 1.5rem;
       }
     }
@@ -97,6 +94,29 @@
         @media (min-width: 768px) {
           font-size: 0.85rem;
         }
+      }
+    }
+  }
+
+  .main-action-row {
+    width: 100%;
+    margin-bottom: 2rem;
+    
+    .btn-nuevo-delivery {
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, #d32f2f 0%, #ff9800 100%);
+      border: none;
+      transition: all 0.2s ease;
+      color: white;
+      font-weight: bold;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(211, 47, 47, 0.3);
+      }
+
+      &:active {
+        transform: translateY(1px);
       }
     }
   }
