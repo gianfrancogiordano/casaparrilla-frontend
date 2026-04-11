@@ -1,0 +1,76 @@
+// ─── Tabs ─────────────────────────────────────────────────────────
+.nav-tabs-custom {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.tab-btn {
+  border: none;
+  background: #fff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: .85rem;
+  color: #555;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  transition: all .2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+  &:hover { background: #f0f4ff; color: #3b82f6; }
+  &.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(59,130,246,.35);
+  }
+}
+
+// ─── Métricas ─────────────────────────────────────────────────────
+.metric-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08) !important; }
+}
+.metric-icon { font-size: 1.5rem; }
+.metric-value { font-size: 1.3rem; }
+.metric-red    { border-left: 4px solid #e74c3c; }
+.metric-orange { border-left: 4px solid #f39c12; }
+.metric-blue   { border-left: 4px solid #3498db; }
+.metric-green  { border-left: 4px solid #27ae60; }
+
+// ─── Status badges ────────────────────────────────────────────────
+.status-pendiente { background: rgba(241,196,15,.12); color: #d4ac0d; }
+.status-pagado    { background: rgba(39,174,96,.12);  color: #27ae60; }
+
+// ─── Type badges ──────────────────────────────────────────────────
+.type-full  { background: rgba(52,152,219,.12); color: #2980b9; }
+.type-half  { background: rgba(155,89,182,.12); color: #8e44ad; }
+.type-shift { background: rgba(230,126,34,.12); color: #d35400; }
+
+// ─── Employee cards ───────────────────────────────────────────────
+.employee-card {
+  border: 1px solid #f0f0f0 !important;
+  transition: transform .15s ease, box-shadow .15s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.08) !important; }
+}
+.bg-success-soft { background: rgba(39,174,96,.08); }
+.bg-danger-soft  { background: rgba(231,76,60,.08); }
+.bg-warning-soft { background: rgba(241,196,15,.08); }
+
+// ─── Tabla ────────────────────────────────────────────────────────
+.custom-table {
+  th { font-size: .72rem; letter-spacing: .5px; border: 0; }
+  td { border-color: #f3f4f6; font-size: .88rem; }
+}
+.hover-row {
+  transition: background .15s;
+  &:hover { background: #f8f9fa; }
+}
+
+// ─── Animación ────────────────────────────────────────────────────
+.animate-fade-in {
+  animation: fadeIn .35s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

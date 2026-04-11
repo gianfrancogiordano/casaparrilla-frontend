@@ -1,0 +1,360 @@
+<div class="container-fluid py-4 animate-fade-in">
+
+  <!-- ═══ KPI CARDS TOP ════════════════════════════════════════════════════ -->
+  <div class="row g-3 mb-4">
+    <!-- Total variables del período -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-red">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="metric-icon">🔄</span>
+            <span class="badge rounded-pill delta-badge">Variables</span>
+          </div>
+          <h3 class="fw-bold metric-value mb-0">{{ (summary?.totalGastos ?? 0) | currency:'USD':'symbol':'1.2-2' }}</h3>
+          <p class="text-muted small mb-0 mt-1">Gastos del Período</p>
+        </div>
+      </div>
+    </div>
+    <!-- Total fijos del catálogo -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-orange">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="metric-icon">📌</span>
+            <span class="badge rounded-pill delta-badge">Fijos</span>
+          </div>
+          <h3 class="fw-bold metric-value mb-0">{{ totalFijosActivos | currency:'USD':'symbol':'1.2-2' }}</h3>
+          <p class="text-muted small mb-0 mt-1">Costos Fijos/Mes</p>
+        </div>
+      </div>
+    </div>
+    <!-- Total combinado -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-blue">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="metric-icon">💸</span>
+            <span class="badge rounded-pill delta-badge">Total</span>
+          </div>
+          <h3 class="fw-bold metric-value mb-0">{{ ((summary?.totalGastos ?? 0) + totalFijosActivos) | currency:'USD':'symbol':'1.2-2' }}</h3>
+          <p class="text-muted small mb-0 mt-1">Egresos Combinados</p>
+        </div>
+      </div>
+    </div>
+    <!-- Cantidad registros variables -->
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-green">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="metric-icon">📊</span>
+            <span class="badge rounded-pill delta-badge">Registros</span>
+          </div>
+          <h3 class="fw-bold metric-value mb-0">{{ summary?.cantidad ?? 0 }}</h3>
+          <p class="text-muted small mb-0 mt-1">Gastos Variables</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TABS ══════════════════════════════════════════════════════════════ -->
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 rounded-top-4 pt-3 px-4 pb-0">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <h4 class="fw-bold mb-0">📤 Gastos Operativos</h4>
+      </div>
+      <ul class="nav nav-tabs border-0 gap-1">
+        <li class="nav-item">
+          <button class="nav-link fw-semibold px-4 rounded-top-3"
+                  [class.active]="tabActiva === 'variables'"
+                  (click)="setTab('variables')">
+            🔄 Variables
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link fw-semibold px-4 rounded-top-3"
+                  [class.active]="tabActiva === 'fijos'"
+                  (click)="setTab('fijos')">
+            📌 Fijos
+            <span class="badge bg-warning-soft text-warning ms-1 rounded-pill small"
+                  *ngIf="gastosFijos.length > 0">{{ gastosFijos.length }}</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ══════════ TAB: GASTOS VARIABLES ══════════════════════════════════ -->
+    <div *ngIf="tabActiva === 'variables'">
+      <!-- Filtros -->
+      <div class="px-4 py-3 border-bottom d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <div class="d-flex gap-2 flex-wrap">
+          <input type="date" class="form-control form-control-sm rounded-pill"
+                 style="width: 140px" [(ngModel)]="filtroDesde" (change)="cargarGastos()">
+          <input type="date" class="form-control form-control-sm rounded-pill"
+                 style="width: 140px" [(ngModel)]="filtroHasta" (change)="cargarGastos()">
+          <select class="form-select form-select-sm rounded-pill" style="width: 160px"
+                  [(ngModel)]="filtroCategoria" (change)="aplicarFiltros()">
+            <option value="">Todas las categorías</option>
+            <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+          </select>
+          <input type="text" class="form-control form-control-sm rounded-pill"
+                 style="width: 180px" placeholder="Buscar..." [(ngModel)]="filtroBusqueda"
+                 (input)="aplicarFiltros()">
+        </div>
+        <button class="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center gap-1"
+                (click)="abrirModalVariable()">
+          <span class="fs-5">+</span> Nuevo Gasto
+        </button>
+      </div>
+
+      <!-- Tabla + distribución por categoría -->
+      <div class="row g-0">
+        <!-- Distribución por categoría -->
+        <div class="col-12 col-xl-3 border-end" *ngIf="summary && summary.categorias.length > 0">
+          <div class="p-4">
+            <h6 class="fw-bold mb-3 small text-uppercase text-muted">Por Categoría</h6>
+            <div *ngFor="let cat of summary.categorias" class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small fw-medium text-dark">{{ getCategoryIcon(cat.category) }} {{ cat.category }}</span>
+                <span class="small text-muted">{{ cat.total | currency:'USD':'symbol':'1.2-2' }}</span>
+              </div>
+              <div class="progress rounded-pill" style="height: 5px;">
+                <div class="progress-bar rounded-pill" [ngClass]="getCategoryClass(cat.category)"
+                     role="progressbar" [style.width.%]="getSummaryPct(cat.total)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <div class="col-12" [ngClass]="{'col-xl-9': summary && summary.categorias.length > 0}">
+          <div class="overflow-auto">
+            <table class="table align-middle mb-0 custom-table">
+              <thead class="bg-light">
+                <tr>
+                  <th class="ps-4 py-3 text-muted small text-uppercase">Descripción</th>
+                  <th class="py-3 text-muted small text-uppercase">Categoría</th>
+                  <th class="py-3 text-muted small text-uppercase">Monto</th>
+                  <th class="py-3 text-muted small text-uppercase d-none d-md-table-cell">Fecha</th>
+                  <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let gasto of gastosFiltrados" class="hover-row">
+                  <td class="ps-4 py-3">
+                    <div class="fw-semibold text-dark">{{ gasto.description }}</div>
+                    <div class="text-muted small" *ngIf="gasto.notes">{{ gasto.notes }}</div>
+                  </td>
+                  <td>
+                    <span class="badge border-0 rounded-pill px-3 py-2" [ngClass]="getCategoryClass(gasto.category)">
+                      {{ getCategoryIcon(gasto.category) }} {{ gasto.category }}
+                    </span>
+                  </td>
+                  <td class="fw-bold text-danger">{{ gasto.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+                  <td class="text-muted small d-none d-md-table-cell">{{ gasto.date | date:'dd/MM/yyyy' }}</td>
+                  <td class="pe-4 text-end">
+                    <button class="btn btn-light btn-sm rounded-circle me-1" (click)="abrirModalVariable(gasto)" title="Editar">✏️</button>
+                    <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminarGasto(gasto)" title="Eliminar">🗑️</button>
+                  </td>
+                </tr>
+                <tr *ngIf="gastosFiltrados.length === 0">
+                  <td colspan="5" class="text-center py-5 text-muted">
+                    <p class="fs-3 mb-1">📋</p>
+                    <p class="small">No hay gastos variables en este período.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB: GASTOS FIJOS ════════════════════════════════════════ -->
+    <div *ngIf="tabActiva === 'fijos'">
+      <!-- Header fijos -->
+      <div class="px-4 py-3 border-bottom d-flex flex-wrap gap-2 align-items-center justify-content-between">
+        <div>
+          <p class="text-muted small mb-0">
+            Costos de estructura del restaurante. Se incluyen automáticamente en todos los reportes.
+          </p>
+        </div>
+        <button class="btn btn-warning btn-sm rounded-pill px-3 d-flex align-items-center gap-1 fw-semibold"
+                (click)="abrirModalFijo()">
+          <span class="fs-5">+</span> Nuevo Gasto Fijo
+        </button>
+      </div>
+
+      <!-- Tabla fijos -->
+      <div class="overflow-auto">
+        <table class="table align-middle mb-0 custom-table">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4 py-3 text-muted small text-uppercase">Nombre</th>
+              <th class="py-3 text-muted small text-uppercase">Categoría</th>
+              <th class="py-3 text-muted small text-uppercase">Monto / Mes</th>
+              <th class="py-3 text-muted small text-uppercase">Estado</th>
+              <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fijo of gastosFijos" class="hover-row"
+                [class.opacity-50]="!fijo.isActive">
+              <td class="ps-4 py-3">
+                <div class="fw-semibold text-dark">{{ fijo.name }}</div>
+                <div class="text-muted small" *ngIf="fijo.notes">{{ fijo.notes }}</div>
+              </td>
+              <td>
+                <span class="badge border-0 rounded-pill px-3 py-2" [ngClass]="getCategoryClass(fijo.category)">
+                  {{ getCategoryIcon(fijo.category) }} {{ fijo.category }}
+                </span>
+              </td>
+              <td class="fw-bold" [class.text-danger]="fijo.isActive" [class.text-muted]="!fijo.isActive">
+                {{ fijo.amount | currency:'USD':'symbol':'1.2-2' }}
+              </td>
+              <td>
+                <div class="form-check form-switch mb-0 d-flex align-items-center gap-2">
+                  <input class="form-check-input" type="checkbox" role="switch"
+                         [checked]="fijo.isActive"
+                         (change)="toggleActivoFijo(fijo)"
+                         style="width: 2.5em; height: 1.3em; cursor: pointer;">
+                  <span class="small fw-semibold" [class.text-success]="fijo.isActive" [class.text-muted]="!fijo.isActive">
+                    {{ fijo.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+              </td>
+              <td class="pe-4 text-end">
+                <button class="btn btn-light btn-sm rounded-circle me-1" (click)="abrirModalFijo(fijo)" title="Editar">✏️</button>
+                <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminarFijo(fijo)" title="Eliminar">🗑️</button>
+              </td>
+            </tr>
+            <!-- Footer con total -->
+            <tr *ngIf="gastosFijos.length > 0" class="bg-light fw-bold">
+              <td class="ps-4 py-3" colspan="2">Total Fijos Activos</td>
+              <td class="text-danger">{{ totalFijosActivos | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td colspan="2"></td>
+            </tr>
+            <tr *ngIf="gastosFijos.length === 0">
+              <td colspan="5" class="text-center py-5 text-muted">
+                <p class="fs-3 mb-1">📌</p>
+                <p class="small">No hay gastos fijos definidos aún.</p>
+                <p class="small">Agregá el alquiler, gas, servicios, etc. para que aparezcan automáticamente en tus reportes.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- MODAL — CREAR / EDITAR GASTO VARIABLE                                    -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalVariable}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">{{ editandoVariable ? 'Editar' : 'Nuevo' }} Gasto Variable</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalVariable()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <form (submit)="guardarVariable()">
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Descripción</label>
+            <input type="text" class="form-control rounded-3" name="description"
+                   [(ngModel)]="formVariable.description" required placeholder="Ej: Pago de electricidad">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Monto (USD)</label>
+              <input type="number" step="0.01" min="0" class="form-control rounded-3"
+                     name="amount" [(ngModel)]="formVariable.amount" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Categoría</label>
+              <select class="form-select rounded-3" name="category" [(ngModel)]="formVariable.category" required>
+                <option *ngFor="let cat of categorias" [value]="cat">{{ getCategoryIcon(cat) }} {{ cat }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Fecha</label>
+            <input type="date" class="form-control rounded-3" name="date"
+                   [(ngModel)]="formVariable.date" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Notas (opcional)</label>
+            <textarea class="form-control rounded-3" name="notes" [(ngModel)]="formVariable.notes"
+                      rows="2" placeholder="Ej: Pagado a CORPOELEC"></textarea>
+          </div>
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold">
+              {{ editandoVariable ? 'Guardar Cambios' : 'Registrar Gasto' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalVariable"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<!-- MODAL — CREAR / EDITAR GASTO FIJO                                        -->
+<!-- ══════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalFijo}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">{{ editandoFijo ? 'Editar' : 'Nuevo' }} Gasto Fijo</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalFijo()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <div class="alert alert-warning border-0 rounded-3 small mb-3" *ngIf="!editandoFijo">
+          📌 Los gastos fijos se incluyen automáticamente en todos los reportes financieros, independientemente del período consultado.
+        </div>
+        <form (submit)="guardarFijo()">
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Nombre</label>
+            <input type="text" class="form-control rounded-3" name="name"
+                   [(ngModel)]="formFijo.name" required placeholder="Ej: Alquiler local">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Monto Mensual (USD)</label>
+              <input type="number" step="0.01" min="0" class="form-control rounded-3"
+                     name="amount" [(ngModel)]="formFijo.amount" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Categoría</label>
+              <select class="form-select rounded-3" name="category" [(ngModel)]="formFijo.category" required>
+                <option *ngFor="let cat of fixedExpensesService.CATEGORIES" [value]="cat">
+                  {{ fixedExpensesService.getCategoryIcon(cat) }} {{ cat }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Notas (opcional)</label>
+            <textarea class="form-control rounded-3" name="notes" [(ngModel)]="formFijo.notes"
+                      rows="2" placeholder="Ej: Contrato vence en diciembre"></textarea>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" role="switch" id="fijoActivo"
+                   name="isActive" [(ngModel)]="formFijo.isActive" style="width:2.5em;height:1.3em;">
+            <label class="form-check-label ms-2 fw-semibold" for="fijoActivo">
+              {{ formFijo.isActive ? '✅ Activo — se incluye en reportes' : '⏸️ Inactivo — no se incluye' }}
+            </label>
+          </div>
+          <div class="mt-4">
+            <button type="submit" class="btn w-100 py-3 rounded-3 fw-bold"
+                    [ngClass]="editandoFijo ? 'btn-primary' : 'btn-warning'">
+              {{ editandoFijo ? 'Guardar Cambios' : 'Agregar al Catálogo' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalFijo"></div>

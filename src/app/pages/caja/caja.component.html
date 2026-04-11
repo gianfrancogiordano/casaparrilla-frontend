@@ -1,0 +1,303 @@
+<div class="container-fluid py-4 animate-fade-in">
+
+  <!-- ═══ SPINNER ─────────────────────────────────────────────────────── -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted mt-2 small">Cargando estado de la caja...</p>
+  </div>
+
+  <!-- ═══ CAJA CERRADA → ABRIR ════════════════════════════════════════ -->
+  <div *ngIf="!cargando && !cajaActual" class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 text-center py-5 px-4 open-box-card">
+        <div class="mb-3">
+          <span class="open-icon">🔐</span>
+        </div>
+        <h4 class="fw-bold mb-2">Caja Cerrada</h4>
+        <p class="text-muted mb-4">No hay caja abierta actualmente. Ingresa el monto inicial para comenzar.</p>
+        <div class="input-group mb-4 mx-auto" style="max-width: 280px;">
+          <span class="input-group-text rounded-start-3 bg-white border-end-0">💵</span>
+          <input type="number" class="form-control rounded-end-3 border-start-0 text-center fw-bold fs-4"
+                 [(ngModel)]="montoInicial" step="0.01" min="0" placeholder="0.00">
+        </div>
+        <button class="btn btn-success btn-lg rounded-pill px-5 fw-bold open-btn"
+                (click)="abrirCaja()" [disabled]="montoInicial < 0">
+          🔓 Abrir Caja
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CAJA ABIERTA ═══════════════════════════════════════════════ -->
+  <div *ngIf="!cargando && cajaActual">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-2">
+      <div>
+        <h4 class="fw-bold text-dark mb-0">💰 Caja Abierta</h4>
+        <p class="text-muted small mb-0">
+          Abierta el {{ cajaActual.openedAt | date:'dd/MM/yyyy HH:mm' }}
+          <span *ngIf="cajaActual.openedBy?.name"> por {{ cajaActual.openedBy.name }}</span>
+        </p>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-warning rounded-pill px-3 d-flex align-items-center"
+                (click)="abrirModalRetiro()">
+          <span class="me-1">💸</span> Registrar Retiro
+        </button>
+        <button class="btn btn-danger rounded-pill px-4 fw-bold d-flex align-items-center"
+                (click)="abrirModalCierre()">
+          <span class="me-1">🔒</span> Cerrar Caja
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-green">
+          <div class="card-body p-3">
+            <span class="metric-icon">💵</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ cajaActual.initialAmount | currency:'USD':'symbol':'1.2-2' }}</h3>
+            <p class="text-muted small mb-0 mt-1">Monto Inicial</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-orange">
+          <div class="card-body p-3">
+            <span class="metric-icon">💸</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ getTotalRetiros() | currency:'USD':'symbol':'1.2-2' }}</h3>
+            <p class="text-muted small mb-0 mt-1">Total Retiros</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-blue">
+          <div class="card-body p-3">
+            <span class="metric-icon">📋</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ cajaActual.withdrawals.length }}</h3>
+            <p class="text-muted small mb-0 mt-1">Retiros Registrados</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-red">
+          <div class="card-body p-3">
+            <span class="metric-icon">⏱️</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ cajaActual.openedAt | date:'HH:mm' }}</h3>
+            <p class="text-muted small mb-0 mt-1">Hora de Apertura</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retiros Registrados -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4" *ngIf="cajaActual.withdrawals.length > 0">
+      <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4">
+        <h6 class="fw-bold mb-0">💸 Retiros de esta Caja</h6>
+      </div>
+      <div class="card-body p-0">
+        <table class="table align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4 py-2 text-muted small text-uppercase">Hora</th>
+              <th class="py-2 text-muted small text-uppercase">Razón</th>
+              <th class="pe-4 py-2 text-end text-muted small text-uppercase">Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let w of cajaActual.withdrawals">
+              <td class="ps-4 text-muted small">{{ w.timestamp | date:'HH:mm' }}</td>
+              <td>{{ w.reason }}</td>
+              <td class="pe-4 text-end fw-bold text-danger">-{{ w.amount | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORIAL DE CORTES ═════════════════════════════════════════ -->
+  <div class="card border-0 shadow-sm rounded-4" *ngIf="historial.length > 0">
+    <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4">
+      <h6 class="fw-bold mb-0">📖 Historial de Cortes de Caja</h6>
+    </div>
+    <div class="card-body p-0 overflow-auto">
+      <table class="table align-middle mb-0 custom-table">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4 py-3 text-muted small text-uppercase">Fecha</th>
+            <th class="py-3 text-muted small text-uppercase">Ventas</th>
+            <th class="py-3 text-muted small text-uppercase d-none d-md-table-cell">Órdenes</th>
+            <th class="py-3 text-muted small text-uppercase">Esperado</th>
+            <th class="py-3 text-muted small text-uppercase">Real</th>
+            <th class="py-3 text-muted small text-uppercase">Diferencia</th>
+            <th class="pe-4 py-3 text-end text-muted small text-uppercase">Detalle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let caja of historial" class="hover-row">
+            <td class="ps-4">
+              <div class="fw-semibold small">{{ caja.closedAt | date:'dd/MM/yyyy' }}</div>
+              <div class="text-muted" style="font-size:.7rem">{{ caja.openedAt | date:'HH:mm' }} → {{ caja.closedAt | date:'HH:mm' }}</div>
+            </td>
+            <td class="fw-bold">{{ caja.salesSummary.totalVentas | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="d-none d-md-table-cell text-muted">{{ caja.salesSummary.cantidadOrdenes }}</td>
+            <td>{{ caja.expectedAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="fw-bold">{{ caja.realAmount | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td>
+              <span class="fw-bold" [ngClass]="getDifferenceClass(caja.difference)">
+                {{ getDifferenceLabel(caja.difference) }}
+                <span *ngIf="caja.difference !== 0">
+                  ({{ caja.difference > 0 ? '+' : '' }}{{ caja.difference | currency:'USD':'symbol':'1.2-2' }})
+                </span>
+              </span>
+            </td>
+            <td class="pe-4 text-end">
+              <button class="btn btn-light btn-sm rounded-circle" (click)="verDetalle(caja)" title="Ver detalle">👁️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL CIERRE DE CAJA ═══════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalCierre}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">🔒 Cerrar Caja</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalCierre()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <p class="text-muted small mb-3">
+          Cuenta el dinero en efectivo que hay en caja y registra el monto real.
+          El sistema calculará automáticamente las ventas del período.
+        </p>
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">Monto Real en Caja (USD)</label>
+          <input type="number" step="0.01" min="0" class="form-control rounded-3 fs-4 text-center fw-bold"
+                 [(ngModel)]="montoReal" placeholder="0.00">
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">Notas (opcional)</label>
+          <textarea class="form-control rounded-3" [(ngModel)]="notasCierre"
+                    rows="2" placeholder="Ej: Todo en orden"></textarea>
+        </div>
+        <button class="btn btn-danger w-100 py-3 rounded-3 fw-bold mt-2" (click)="confirmarCierre()">
+          🔒 Confirmar Cierre de Caja
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalCierre"></div>
+
+<!-- ═══ MODAL RETIRO ══════════════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalRetiro}">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">💸 Registrar Retiro</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalRetiro()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">Monto (USD)</label>
+          <input type="number" step="0.01" min="0" class="form-control rounded-3 text-center fw-bold"
+                 [(ngModel)]="montoRetiro">
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">Razón</label>
+          <input type="text" class="form-control rounded-3" [(ngModel)]="razonRetiro"
+                 placeholder="Ej: Compra de gas">
+        </div>
+        <button class="btn btn-warning w-100 py-3 rounded-3 fw-bold" (click)="confirmarRetiro()"
+                [disabled]="!montoRetiro || !razonRetiro">
+          Registrar Retiro
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalRetiro"></div>
+
+<!-- ═══ MODAL DETALLE DE CORTE ════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarDetalle}">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4" *ngIf="cajaDetalle">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">📋 Detalle de Corte — {{ cajaDetalle.closedAt | date:'dd/MM/yyyy' }}</h5>
+        <button type="button" class="btn-close" (click)="cerrarDetalle()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <div class="row g-3 mb-4">
+          <!-- Resumen de ventas por método -->
+          <div class="col-md-6">
+            <h6 class="fw-bold small text-uppercase text-muted mb-3">💳 Ventas por Método</h6>
+            <div class="d-flex justify-content-between border-bottom py-2" *ngIf="cajaDetalle.salesSummary.efectivo">
+              <span>💵 Efectivo</span>
+              <span class="fw-bold">{{ cajaDetalle.salesSummary.efectivo | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2" *ngIf="cajaDetalle.salesSummary.pagoMovil">
+              <span>📲 Pago Móvil</span>
+              <span class="fw-bold">{{ cajaDetalle.salesSummary.pagoMovil | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2" *ngIf="cajaDetalle.salesSummary.zelle">
+              <span>💜 Zelle</span>
+              <span class="fw-bold">{{ cajaDetalle.salesSummary.zelle | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2" *ngIf="cajaDetalle.salesSummary.binance">
+              <span>🟡 Binance</span>
+              <span class="fw-bold">{{ cajaDetalle.salesSummary.binance | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2" *ngIf="cajaDetalle.salesSummary.bancolombia">
+              <span>🏦 Bancolombia</span>
+              <span class="fw-bold">{{ cajaDetalle.salesSummary.bancolombia | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between pt-2 fw-bold">
+              <span>Total Ventas</span>
+              <span class="text-success">{{ cajaDetalle.salesSummary.totalVentas | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+          <!-- Cuadre de caja -->
+          <div class="col-md-6">
+            <h6 class="fw-bold small text-uppercase text-muted mb-3">🧮 Cuadre de Caja</h6>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span>Monto Inicial</span>
+              <span class="fw-bold">{{ cajaDetalle.initialAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span>+ Ventas Efectivo</span>
+              <span class="fw-bold text-success">{{ cajaDetalle.salesSummary.efectivo | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2" *ngIf="cajaDetalle.withdrawals.length > 0">
+              <span>- Retiros ({{ cajaDetalle.withdrawals.length }})</span>
+              <span class="fw-bold text-danger">-{{ cajaDetalle.expectedAmount - cajaDetalle.initialAmount - cajaDetalle.salesSummary.efectivo | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span>= Esperado en Caja</span>
+              <span class="fw-bold">{{ cajaDetalle.expectedAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span>Monto Real Contado</span>
+              <span class="fw-bold">{{ cajaDetalle.realAmount | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="d-flex justify-content-between pt-2 fw-bold fs-5" [ngClass]="getDifferenceClass(cajaDetalle.difference)">
+              <span>{{ getDifferenceLabel(cajaDetalle.difference) }}</span>
+              <span *ngIf="cajaDetalle.difference !== 0">
+                {{ cajaDetalle.difference > 0 ? '+' : '' }}{{ cajaDetalle.difference | currency:'USD':'symbol':'1.2-2' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="cajaDetalle.notes" class="alert alert-light rounded-3 small">
+          <strong>Notas:</strong> {{ cajaDetalle.notes }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarDetalle"></div>

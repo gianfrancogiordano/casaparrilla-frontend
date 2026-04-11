@@ -26,7 +26,7 @@ export class SidebarComponent implements OnInit {
       label: 'Dashboard',
       icon: '📊',
       route: '/dashboard',
-      roles: ['Administrador'],
+      roles: ['Administrador', 'Mesero'],
     },
     {
       label: 'Meseros',
@@ -38,7 +38,7 @@ export class SidebarComponent implements OnInit {
       label: 'Delivery',
       icon: '🛵',
       route: '/delivery',
-      roles: ['Administrador'],
+      roles: ['Administrador', 'Mesero'],
     },
     {
       label: 'Pedidos',
@@ -57,6 +57,37 @@ export class SidebarComponent implements OnInit {
       label: 'Inventario',
       icon: '📦',
       route: '/inventario',
+      roles: ['Administrador'],
+    },
+    // ── Finanzas (solo Admin) ─────────────────────────────────────────────
+    {
+      label: 'Caja',
+      icon: '💰',
+      route: '/caja',
+      roles: ['Administrador'],
+    },
+    {
+      label: 'Gastos',
+      icon: '📤',
+      route: '/gastos',
+      roles: ['Administrador'],
+    },
+    {
+      label: 'Reportes',
+      icon: '📈',
+      route: '/reportes',
+      roles: ['Administrador'],
+    },
+    {
+      label: 'Compras',
+      icon: '🏪',
+      route: '/compras',
+      roles: ['Administrador'],
+    },
+    {
+      label: 'Nómina',
+      icon: '💼',
+      route: '/nomina',
       roles: ['Administrador'],
     },
     // ── Configuración (solo Admin) ─────────────────────────────────────────
@@ -107,6 +138,12 @@ export class SidebarComponent implements OnInit {
   get gestionItems(): NavItem[] {
     const gestion = ['Productos', 'Inventario'];
     return this.menuItems.filter((i) => gestion.includes(i.label));
+  }
+
+  /** Items de finanzas visibles */
+  get finanzasItems(): NavItem[] {
+    const finanzas = ['Caja', 'Gastos', 'Reportes', 'Compras', 'Nómina'];
+    return this.menuItems.filter((i) => finanzas.includes(i.label));
   }
 
   /** Items de configuración visibles */

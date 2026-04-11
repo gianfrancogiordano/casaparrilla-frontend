@@ -10,7 +10,12 @@ import { ProductosComponent } from './pages/productos/productos.component';
 import { PedidosComponent } from './pages/pedidos/pedidos.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { ClientesComponent } from './pages/clientes/clientes.component';
-import { DeliveryComponent } from './pages/delivery/delivery.component'; // Import DeliveryComponent
+import { DeliveryComponent } from './pages/delivery/delivery.component';
+import { GastosComponent } from './pages/gastos/gastos.component';
+import { CajaComponent } from './pages/caja/caja.component';
+import { ReportesComponent } from './pages/reportes/reportes.component';
+import { ComprasComponent } from './pages/compras/compras.component';
+import { NominaComponent } from './pages/nomina/nomina.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -30,6 +35,11 @@ export const routes: Routes = [
       { path: 'inventario', component: InventarioComponent },
       { path: 'productos', component: ProductosComponent },
       { path: 'pedidos', component: PedidosComponent },
+      { path: 'caja', component: CajaComponent },
+      { path: 'gastos', component: GastosComponent },
+      { path: 'reportes', component: ReportesComponent },
+      { path: 'compras', component: ComprasComponent },
+      { path: 'nomina', component: NominaComponent },
       { path: 'usuarios', component: UsuariosComponent },
       { path: 'clientes', component: ClientesComponent },
       { path: 'test-printer', component: TestPrinterComponent },
@@ -37,3 +47,4 @@ export const routes: Routes = [
   },
   { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
+

@@ -59,6 +59,21 @@
         </a>
       </li>
 
+      <!-- ── Sección Finanzas ──────────────────────────────────── -->
+      <li class="nav-item mt-3 mb-1" *ngIf="finanzasItems.length > 0">
+        <h6 class="px-4 text-muted small text-uppercase fw-bold">Finanzas</h6>
+      </li>
+      <li class="nav-item" *ngFor="let item of finanzasItems">
+        <a class="nav-link link-dark px-4 py-3 d-flex align-items-center custom-hover"
+          [routerLink]="item.route"
+          routerLinkActive="active-nav-link"
+          data-bs-dismiss="offcanvas"
+          data-bs-target="#sidebarOffcanvas">
+          <span class="fs-5 me-3">{{ item.icon }}</span>
+          <span class="fw-medium">{{ item.label }}</span>
+        </a>
+      </li>
+
       <!-- ── Sección Configuración ──────────────────────────────── -->
       <li class="nav-item mt-3 mb-1" *ngIf="configItems.length > 0">
         <h6 class="px-4 text-muted small text-uppercase fw-bold">Configuración</h6>

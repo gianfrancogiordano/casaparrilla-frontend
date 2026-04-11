@@ -1,0 +1,64 @@
+// ─── Métricas ─────────────────────────────────────────────────────
+.metric-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08) !important; }
+}
+.metric-icon { font-size: 1.5rem; }
+.metric-value { font-size: 1.3rem; }
+.metric-red    { border-left: 4px solid #e74c3c; }
+.metric-orange { border-left: 4px solid #f39c12; }
+.metric-blue   { border-left: 4px solid #3498db; }
+.metric-green  { border-left: 4px solid #27ae60; }
+.delta-badge {
+  font-size: .65rem; font-weight: 700; letter-spacing: .3px;
+  background: rgba(0,0,0,.05); color: #555;
+}
+
+// ─── Categorías (barras + badges) ─────────────────────────────────
+.cat-alquiler      { background: rgba(52,152,219,.15); color: #2980b9; }
+.cat-servicios     { background: rgba(241,196,15,.15); color: #d4ac0d; }
+.cat-gas           { background: rgba(231,76,60,.15);  color: #c0392b; }
+.cat-limpieza      { background: rgba(46,204,113,.15); color: #27ae60; }
+.cat-mantenimiento { background: rgba(155,89,182,.15); color: #8e44ad; }
+.cat-marketing     { background: rgba(230,126,34,.15); color: #d35400; }
+.cat-nomina        { background: rgba(52,73,94,.15);   color: #2c3e50; }
+.cat-compras       { background: rgba(26,188,156,.15); color: #16a085; }
+.cat-transporte    { background: rgba(149,165,166,.15);color: #7f8c8d; }
+.cat-otros         { background: rgba(127,140,141,.15);color: #95a5a6; }
+
+// Progress bars match category colors
+.progress-bar {
+  &.cat-alquiler      { background: #3498db; }
+  &.cat-servicios     { background: #f1c40f; }
+  &.cat-gas           { background: #e74c3c; }
+  &.cat-limpieza      { background: #2ecc71; }
+  &.cat-mantenimiento { background: #9b59b6; }
+  &.cat-marketing     { background: #e67e22; }
+  &.cat-nomina        { background: #34495e; }
+  &.cat-compras       { background: #1abc9c; }
+  &.cat-transporte    { background: #95a5a6; }
+  &.cat-otros         { background: #7f8c8d; }
+}
+
+// Info badges
+.bg-warning-soft { background: rgba(241,196,15,.12); }
+.bg-info-soft    { background: rgba(52,152,219,.12); }
+
+// ─── Tabla ────────────────────────────────────────────────────────
+.custom-table {
+  th { font-size: .72rem; letter-spacing: .5px; border: 0; }
+  td { border-color: #f3f4f6; font-size: .88rem; }
+}
+.hover-row {
+  transition: background .15s;
+  &:hover { background: #f8f9fa; }
+}
+
+// ─── Animación ────────────────────────────────────────────────────
+.animate-fade-in {
+  animation: fadeIn .35s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

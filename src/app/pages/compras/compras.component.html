@@ -1,0 +1,477 @@
+<div class="container-fluid py-4 animate-fade-in">
+  <!-- ═══ HEADER ═════════════════════════════════════════════════════════ -->
+  <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-2">
+    <div>
+      <h4 class="fw-bold text-dark mb-0">🏪 Compras &amp; Proveedores</h4>
+      <p class="text-muted small mb-0">Gestión de insumos y proveedores del restaurante</p>
+    </div>
+    <div class="d-flex gap-2">
+      <input type="date" class="form-control form-control-sm rounded-pill" style="width:140px"
+             [(ngModel)]="filtroDesde" (change)="cargarCompras()">
+      <input type="date" class="form-control form-control-sm rounded-pill" style="width:140px"
+             [(ngModel)]="filtroHasta" (change)="cargarCompras()">
+    </div>
+  </div>
+
+  <!-- ═══ TABS ═══════════════════════════════════════════════════════════ -->
+  <div class="nav-tabs-custom mb-4">
+    <button class="tab-btn" [class.active]="vistaActiva === 'compras'" (click)="vistaActiva = 'compras'">
+      🛒 Órdenes de Compra
+    </button>
+    <button class="tab-btn" [class.active]="vistaActiva === 'proveedores'" (click)="vistaActiva = 'proveedores'">
+      🏢 Proveedores
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ═══ VISTA: ORDENES DE COMPRA ═══════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="vistaActiva === 'compras'">
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4" *ngIf="summary">
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-red">
+          <div class="card-body p-3">
+            <span class="metric-icon">💸</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ summary.totalCompras | currency:'USD':'symbol':'1.2-2' }}</h3>
+            <p class="text-muted small mb-0 mt-1">Total Compras</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-blue">
+          <div class="card-body p-3">
+            <span class="metric-icon">📋</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ summary.cantidadOrdenes }}</h3>
+            <p class="text-muted small mb-0 mt-1">Órdenes Confirmadas</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-green">
+          <div class="card-body p-3">
+            <span class="metric-icon">🏢</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ summary.proveedores.length }}</h3>
+            <p class="text-muted small mb-0 mt-1">Proveedores Activos</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-orange">
+          <div class="card-body p-3">
+            <span class="metric-icon">🥩</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ summary.ingredientes.length }}</h3>
+            <p class="text-muted small mb-0 mt-1">Insumos Comprados</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <!-- Resumen por proveedor e ingrediente -->
+      <div class="col-12 col-xl-4" *ngIf="summary && summary.proveedores.length > 0">
+        <!-- Top proveedores -->
+        <div class="card border-0 shadow-sm rounded-4 mb-3">
+          <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4">
+            <h6 class="fw-bold mb-0">🏢 Top Proveedores</h6>
+          </div>
+          <div class="card-body px-4 pt-2 pb-3">
+            <div *ngFor="let prov of summary.proveedores" class="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <div>
+                <span class="small fw-medium">{{ prov.nombre }}</span>
+                <span class="text-muted small ms-1">({{ prov.cantidad }} órdenes)</span>
+              </div>
+              <span class="fw-bold small">{{ prov.total | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Top ingredientes -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4">
+            <h6 class="fw-bold mb-0">🥩 Top Insumos</h6>
+          </div>
+          <div class="card-body px-4 pt-2 pb-3">
+            <div *ngFor="let ing of summary.ingredientes" class="d-flex justify-content-between align-items-center py-2 border-bottom">
+              <div>
+                <span class="small fw-medium">{{ ing.nombre }}</span>
+                <span class="text-muted small ms-1">({{ ing.cantidadComprada }} {{ ing.unidad }})</span>
+              </div>
+              <span class="fw-bold small text-danger">{{ ing.total | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de órdenes -->
+      <div class="col-12" [ngClass]="{'col-xl-8': summary && summary.proveedores.length > 0}">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-white border-0 py-4 px-4">
+            <div class="row align-items-center">
+              <div class="col-12 col-md-5">
+                <h5 class="fw-bold mb-0">🛒 Órdenes de Compra</h5>
+              </div>
+              <div class="col-12 col-md-7 text-md-end mt-3 mt-md-0">
+                <div class="d-flex gap-2 justify-content-md-end flex-wrap">
+                  <select class="form-select form-select-sm rounded-pill" style="width: 140px"
+                          [(ngModel)]="filtroStatus" (change)="aplicarFiltros()">
+                    <option value="">Todos</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Confirmada">Confirmada</option>
+                    <option value="Cancelada">Cancelada</option>
+                  </select>
+                  <button class="btn btn-primary btn-sm rounded-pill px-3 d-flex align-items-center"
+                          (click)="abrirModalCompra()" [disabled]="suppliers.length === 0">
+                    <span class="fs-5 me-1">+</span> Nueva Compra
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body p-0 overflow-auto">
+            <table class="table align-middle mb-0 custom-table">
+              <thead class="bg-light">
+                <tr>
+                  <th class="ps-4 py-3 text-muted small text-uppercase">Fecha</th>
+                  <th class="py-3 text-muted small text-uppercase">Proveedor</th>
+                  <th class="py-3 text-muted small text-uppercase d-none d-md-table-cell">Items</th>
+                  <th class="py-3 text-muted small text-uppercase">Total</th>
+                  <th class="py-3 text-muted small text-uppercase">Estado</th>
+                  <th class="pe-4 py-3 text-end text-muted small text-uppercase">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let compra of purchasesFiltradas" class="hover-row">
+                  <td class="ps-4 text-muted small">{{ compra.date | date:'dd/MM/yyyy' }}</td>
+                  <td class="fw-semibold">{{ getSupplierName(compra.supplierId) }}</td>
+                  <td class="d-none d-md-table-cell text-muted small">
+                    {{ compra.items.length }} insumos
+                  </td>
+                  <td class="fw-bold">{{ compra.total | currency:'USD':'symbol':'1.2-2' }}</td>
+                  <td>
+                    <span class="badge rounded-pill px-3 py-2" [ngClass]="getStatusClass(compra.status)">
+                      {{ getStatusIcon(compra.status) }} {{ compra.status }}
+                    </span>
+                  </td>
+                  <td class="pe-4 text-end">
+                    <button class="btn btn-light btn-sm rounded-circle me-1" (click)="verDetalle(compra)" title="Ver detalle">👁️</button>
+                    <button class="btn btn-light btn-sm rounded-circle me-1 text-success"
+                            (click)="confirmarCompra(compra)" *ngIf="compra.status === 'Pendiente'" title="Confirmar">✅</button>
+                    <button class="btn btn-light btn-sm rounded-circle me-1 text-warning"
+                            (click)="cancelarCompra(compra)" *ngIf="compra.status === 'Pendiente'" title="Cancelar">❌</button>
+                    <button class="btn btn-light btn-sm rounded-circle text-danger"
+                            (click)="eliminarCompra(compra)" *ngIf="compra.status !== 'Confirmada'" title="Eliminar">🗑️</button>
+                  </td>
+                </tr>
+                <tr *ngIf="purchasesFiltradas.length === 0">
+                  <td colspan="6" class="text-center py-5 text-muted">
+                    <p class="fs-3 mb-1">🛒</p>
+                    <p class="small">No hay órdenes de compra en este período.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ═══ VISTA: PROVEEDORES ═════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="vistaActiva === 'proveedores'">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-white border-0 py-4 px-4">
+            <div class="d-flex align-items-center justify-content-between">
+              <h5 class="fw-bold mb-0">🏢 Directorio de Proveedores</h5>
+              <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="abrirModalProveedor()">
+                <span class="fs-5 me-1">+</span> Nuevo Proveedor
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <!-- Cards para cada proveedor -->
+            <div *ngIf="suppliers.length === 0" class="text-center py-5 text-muted">
+              <p class="fs-3">🏢</p>
+              <p class="small">No hay proveedores registrados. Crea uno para comenzar.</p>
+            </div>
+
+            <div class="row g-3 p-4" *ngIf="suppliers.length > 0">
+              <div class="col-12 col-md-6" *ngFor="let prov of suppliers">
+                <div class="card border-0 shadow-sm rounded-4 supplier-card h-100">
+                  <div class="card-body p-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                      <div>
+                        <h6 class="fw-bold mb-1">{{ prov.name }}</h6>
+                        <span class="badge rounded-pill px-2 py-1"
+                              [ngClass]="prov.active ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'">
+                          {{ prov.active ? '🟢 Activo' : '🔴 Inactivo' }}
+                        </span>
+                      </div>
+                      <div class="d-flex gap-1">
+                        <button class="btn btn-light btn-sm rounded-circle" (click)="abrirModalProveedor(prov)">✏️</button>
+                        <button class="btn btn-light btn-sm rounded-circle text-danger" (click)="eliminarProveedor(prov)">🗑️</button>
+                      </div>
+                    </div>
+                    <div class="small text-muted" *ngIf="prov.contactPerson">
+                      <span class="me-1">👤</span> {{ prov.contactPerson }}
+                    </div>
+                    <div class="small text-muted" *ngIf="prov.phone">
+                      <span class="me-1">📞</span> {{ prov.phone }}
+                    </div>
+                    <div class="small text-muted" *ngIf="prov.email">
+                      <span class="me-1">📧</span> {{ prov.email }}
+                    </div>
+                    <div class="small text-muted" *ngIf="prov.address">
+                      <span class="me-1">📍</span> {{ prov.address }}
+                    </div>
+                    <div class="small text-muted mt-2" *ngIf="prov.notes">
+                      <span class="me-1">📝</span> {{ prov.notes }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL PROVEEDOR ═══════════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalProveedor}">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">{{ editandoProveedor ? 'Editar' : 'Nuevo' }} Proveedor</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalProveedor()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <form (submit)="guardarProveedor()">
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Nombre *</label>
+            <input type="text" class="form-control rounded-3" name="name"
+                   [(ngModel)]="formProveedor.name" required placeholder="Ej: Distribuidora XYZ">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Persona de Contacto</label>
+              <input type="text" class="form-control rounded-3" name="contactPerson"
+                     [(ngModel)]="formProveedor.contactPerson" placeholder="Nombre">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Teléfono</label>
+              <input type="tel" class="form-control rounded-3" name="phone"
+                     [(ngModel)]="formProveedor.phone" placeholder="+58 412 1234567">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Email</label>
+              <input type="email" class="form-control rounded-3" name="email"
+                     [(ngModel)]="formProveedor.email" placeholder="email@ejemplo.com">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label text-muted small fw-bold">Estado</label>
+              <div class="form-check mt-2">
+                <input type="checkbox" class="form-check-input" id="supplierActive"
+                       name="active" [(ngModel)]="formProveedor.active">
+                <label class="form-check-label small" for="supplierActive">Proveedor Activo</label>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Dirección</label>
+            <input type="text" class="form-control rounded-3" name="address"
+                   [(ngModel)]="formProveedor.address" placeholder="Dirección del proveedor">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Notas</label>
+            <textarea class="form-control rounded-3" name="notes" [(ngModel)]="formProveedor.notes"
+                      rows="2" placeholder="Observaciones"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold">
+            {{ editandoProveedor ? 'Guardar Cambios' : 'Registrar Proveedor' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalProveedor"></div>
+
+<!-- ═══ MODAL NUEVA COMPRA ═══════════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarModalCompra}">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">🛒 Nueva Orden de Compra</h5>
+        <button type="button" class="btn-close" (click)="cerrarModalCompra()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <form (submit)="guardarCompra()">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold">Proveedor *</label>
+              <select class="form-select rounded-3" name="supplierId" [(ngModel)]="formCompra.supplierId" required>
+                <option value="">Seleccionar proveedor</option>
+                <option *ngFor="let s of suppliers" [value]="s._id">{{ s.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-muted small fw-bold">Fecha *</label>
+              <input type="date" class="form-control rounded-3" name="date"
+                     [(ngModel)]="formCompra.date" required>
+            </div>
+          </div>
+
+          <!-- Items dinámicos -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label text-muted small fw-bold mb-0">Insumos</label>
+              <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="agregarItem()">
+                + Agregar Insumo
+              </button>
+            </div>
+
+            <div *ngFor="let item of formCompra.items; let i = index" class="border rounded-3 p-3 mb-2 item-row">
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                  <label class="form-label text-muted small mb-1">Ingrediente</label>
+                  <select class="form-select form-select-sm rounded-3" [(ngModel)]="item.ingredientId"
+                          [name]="'ing_' + i" (change)="onIngredientSelected(item)">
+                    <option value="">Seleccionar</option>
+                    <option *ngFor="let ing of ingredients" [value]="ing._id">{{ ing.name }} ({{ ing.unitMeasure }})</option>
+                  </select>
+                </div>
+                <div class="col-4 col-md-2">
+                  <label class="form-label text-muted small mb-1">Cantidad</label>
+                  <input type="number" step="0.01" min="0" class="form-control form-control-sm rounded-3"
+                         [(ngModel)]="item.quantity" [name]="'qty_' + i" (input)="calcularSubtotal(item)">
+                </div>
+                <div class="col-4 col-md-2">
+                  <label class="form-label text-muted small mb-1">Costo Unit.</label>
+                  <input type="number" step="0.01" min="0" class="form-control form-control-sm rounded-3"
+                         [(ngModel)]="item.unitCost" [name]="'cost_' + i" (input)="calcularSubtotal(item)">
+                </div>
+                <div class="col-3 col-md-2">
+                  <label class="form-label text-muted small mb-1">Subtotal</label>
+                  <div class="form-control-plaintext fw-bold small text-danger">
+                    {{ item.subtotal | currency:'USD':'symbol':'1.2-2' }}
+                  </div>
+                </div>
+                <div class="col-1 col-md-2 text-end">
+                  <button type="button" class="btn btn-light btn-sm rounded-circle text-danger"
+                          (click)="quitarItem(i)" *ngIf="formCompra.items.length > 1">🗑️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center py-3 px-3 bg-light rounded-3 mb-3">
+            <span class="fw-bold">Total de la Compra</span>
+            <span class="fw-bold fs-4 text-danger">{{ formCompra.total | currency:'USD':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Notas</label>
+            <textarea class="form-control rounded-3" name="notes" [(ngModel)]="formCompra.notes"
+                      rows="2" placeholder="Observaciones de la compra"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold"
+                  [disabled]="!formCompra.supplierId || formCompra.items.length === 0 || formCompra.total <= 0">
+            Crear Orden de Compra
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarModalCompra"></div>
+
+<!-- ═══ MODAL DETALLE DE COMPRA ══════════════════════════════════════════ -->
+<div class="modal fade" [ngClass]="{'show d-block': mostrarDetalle}">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4" *ngIf="compraDetalle">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="fw-bold">📋 Detalle de Compra</h5>
+        <button type="button" class="btn-close" (click)="cerrarDetalle()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <!-- Info general -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="p-3 bg-light rounded-3">
+              <p class="text-muted small mb-0">Proveedor</p>
+              <p class="fw-bold mb-0">{{ getSupplierName(compraDetalle.supplierId) }}</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 bg-light rounded-3">
+              <p class="text-muted small mb-0">Fecha</p>
+              <p class="fw-bold mb-0">{{ compraDetalle.date | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 bg-light rounded-3">
+              <p class="text-muted small mb-0">Estado</p>
+              <p class="fw-bold mb-0">
+                <span class="badge rounded-pill px-3 py-2" [ngClass]="getStatusClass(compraDetalle.status)">
+                  {{ getStatusIcon(compraDetalle.status) }} {{ compraDetalle.status }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla de items -->
+        <h6 class="fw-bold small text-uppercase text-muted mb-3">🥩 Insumos Comprados</h6>
+        <table class="table align-middle mb-3">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-3 py-2 small text-muted text-uppercase">Ingrediente</th>
+              <th class="py-2 small text-muted text-uppercase">Cantidad</th>
+              <th class="py-2 small text-muted text-uppercase">Costo Unit.</th>
+              <th class="pe-3 py-2 text-end small text-muted text-uppercase">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of compraDetalle.items">
+              <td class="ps-3 fw-semibold">{{ item.ingredientName }}</td>
+              <td class="text-muted">{{ item.quantity }} {{ item.unitMeasure }}</td>
+              <td class="text-muted">{{ item.unitCost | currency:'USD':'symbol':'1.2-2' }}</td>
+              <td class="pe-3 text-end fw-bold text-danger">{{ item.subtotal | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-end fw-bold fs-5">Total</td>
+              <td class="pe-3 text-end fw-bold fs-5 text-danger">{{ compraDetalle.total | currency:'USD':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div *ngIf="compraDetalle.notes" class="alert alert-light rounded-3 small">
+          <strong>Notas:</strong> {{ compraDetalle.notes }}
+        </div>
+
+        <!-- Acciones -->
+        <div class="d-flex gap-2 mt-3" *ngIf="compraDetalle.status === 'Pendiente'">
+          <button class="btn btn-success flex-fill py-3 rounded-3 fw-bold" (click)="confirmarCompra(compraDetalle); cerrarDetalle()">
+            ✅ Confirmar y Actualizar Inventario
+          </button>
+          <button class="btn btn-outline-danger py-3 rounded-3 fw-bold" (click)="cancelarCompra(compraDetalle); cerrarDetalle()">
+            ❌ Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="mostrarDetalle"></div>
