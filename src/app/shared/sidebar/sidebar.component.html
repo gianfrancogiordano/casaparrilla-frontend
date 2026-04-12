@@ -40,7 +40,14 @@
           data-bs-dismiss="offcanvas"
           data-bs-target="#sidebarOffcanvas">
           <span class="fs-5 me-3">{{ item.icon }}</span>
-          <span class="fw-medium">{{ item.label }}</span>
+          <span class="fw-medium flex-grow-1">{{ item.label }}</span>
+          <!-- Unread badge only for Inbox -->
+          <span
+            *ngIf="item.route === '/inbox' && inboxUnread > 0"
+            class="badge rounded-pill"
+            style="background:#25d366; color:#000; font-size:0.65rem; font-weight:800;">
+            {{ inboxUnread }}
+          </span>
         </a>
       </li>
 

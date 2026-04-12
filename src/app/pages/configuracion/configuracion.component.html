@@ -1,0 +1,293 @@
+<div class="config-page animate-fade-in" *ngIf="!cargando; else loader">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════════════ -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h5 class="fw-bold mb-0">⚙️ Configuración</h5>
+      <p class="text-muted x-small mb-0">Ajustes globales del restaurante</p>
+    </div>
+    <button class="btn btn-primary btn-sm rounded-pill px-4 fw-bold d-flex align-items-center gap-2"
+            (click)="guardar()" [disabled]="guardando">
+      <span *ngIf="!guardando">💾 Guardar</span>
+      <span *ngIf="guardando" class="spinner-border spinner-border-sm"></span>
+    </button>
+  </div>
+
+  <!-- ══ TABS DE SECCIÓN ══════════════════════════════════════════════════ -->
+  <div class="section-tabs mb-4">
+    <button class="tab-btn" [class.active]="seccionActiva === 'general'" (click)="setSeccion('general')">
+      🏠 General
+    </button>
+    <button class="tab-btn" [class.active]="seccionActiva === 'tasas'" (click)="setSeccion('tasas')">
+      💱 Tasas
+    </button>
+    <button class="tab-btn" [class.active]="seccionActiva === 'pagos'" (click)="setSeccion('pagos')">
+      💳 Pagos
+    </button>
+    <button class="tab-btn" [class.active]="seccionActiva === 'horarios'" (click)="setSeccion('horarios')">
+      ⏰ Horarios
+    </button>
+    <button class="tab-btn" [class.active]="seccionActiva === 'operacion'" (click)="setSeccion('operacion')">
+      🍽️ Operación
+    </button>
+  </div>
+
+  <!-- ══ SECCIÓN: GENERAL ═════════════════════════════════════════════════ -->
+  <div *ngIf="seccionActiva === 'general'" class="section-card animate-fade-in">
+    <div class="section-header">
+      <span class="section-icon">🏠</span>
+      <div>
+        <div class="section-title">Información del Restaurante</div>
+        <div class="section-subtitle">Datos básicos y de contacto</div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-12">
+        <label class="field-label">Nombre del Restaurante</label>
+        <input type="text" class="form-control rounded-3" [(ngModel)]="form.nombreRestaurante"
+               placeholder="Ej: Casa Parrilla">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="field-label">Teléfono / WhatsApp</label>
+        <input type="text" class="form-control rounded-3" [(ngModel)]="form.telefono"
+               placeholder="Ej: 584247904050">
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="field-label">Estado del Restaurante</label>
+        <div class="form-check form-switch mt-2 ps-5">
+          <input class="form-check-input" type="checkbox" id="activoSwitch" [(ngModel)]="form.activo">
+          <label class="form-check-label fw-semibold" for="activoSwitch">
+            <span [class.text-success]="form.activo" [class.text-danger]="!form.activo">
+              {{ form.activo ? '✅ Abierto' : '🔴 Cerrado' }}
+            </span>
+          </label>
+        </div>
+      </div>
+      <div class="col-12">
+        <label class="field-label">Dirección</label>
+        <input type="text" class="form-control rounded-3" [(ngModel)]="form.direccion"
+               placeholder="Urb, Calle, Local...">
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN: TASAS ══════════════════════════════════════════════════ -->
+  <div *ngIf="seccionActiva === 'tasas'" class="section-card animate-fade-in">
+    <div class="section-header">
+      <span class="section-icon">💱</span>
+      <div>
+        <div class="section-title">Tasas de Cambio</div>
+        <div class="section-subtitle">Conversión de monedas para precios y totales</div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-12 col-md-4">
+        <label class="field-label">Moneda Principal</label>
+        <select class="form-select rounded-3" [(ngModel)]="form.monedaPrincipal">
+          <option value="USD">USD — Dólar</option>
+          <option value="BS">BS — Bolívar</option>
+          <option value="COP">COP — Peso Colombiano</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-4">
+        <label class="field-label">Moneda Tienda Online</label>
+        <select class="form-select rounded-3" [(ngModel)]="form.monedaDefaultTienda">
+          <option value="USD">USD</option>
+          <option value="BS">BS</option>
+          <option value="COP">COP</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <div class="tasa-card">
+          <div class="tasa-flag">🇻🇪</div>
+          <div class="flex-grow-1">
+            <label class="field-label mb-1">1 USD = ? Bolívares (Bs)</label>
+            <input type="number" class="form-control rounded-3" [(ngModel)]="form.tasaCambioUsdBs"
+                   min="0" step="1" placeholder="Ej: 650">
+          </div>
+          <div class="tasa-preview">
+            <div class="x-small text-muted">Equivale a</div>
+            <div class="fw-bold text-primary">Bs {{ form.tasaCambioUsdBs | number:'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="tasa-card">
+          <div class="tasa-flag">🇨🇴</div>
+          <div class="flex-grow-1">
+            <label class="field-label mb-1">1 USD = ? Pesos Colombianos (COP)</label>
+            <input type="number" class="form-control rounded-3" [(ngModel)]="form.tasaCambioUsdCop"
+                   min="0" step="100" placeholder="Ej: 3700">
+          </div>
+          <div class="tasa-preview">
+            <div class="x-small text-muted">Equivale a</div>
+            <div class="fw-bold text-primary">$ {{ form.tasaCambioUsdCop | number:'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN: PAGOS ══════════════════════════════════════════════════ -->
+  <div *ngIf="seccionActiva === 'pagos'" class="section-card animate-fade-in">
+    <div class="section-header">
+      <span class="section-icon">💳</span>
+      <div>
+        <div class="section-title">Métodos de Pago</div>
+        <div class="section-subtitle">Datos que verá el cliente al pagar</div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-12">
+        <div class="pago-row">
+          <div class="pago-icon">🏦</div>
+          <div class="flex-grow-1">
+            <label class="field-label">Bancolombia</label>
+            <input type="text" class="form-control rounded-3" [(ngModel)]="form.pagoBancolombia"
+                   placeholder="Transferencia / Ahorros | Cuenta: ... | Titular: ...">
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="pago-row">
+          <div class="pago-icon">🪙</div>
+          <div class="flex-grow-1">
+            <label class="field-label">Binance / Cripto</label>
+            <input type="text" class="form-control rounded-3" [(ngModel)]="form.pagoBinance"
+                   placeholder="Email Binance | ID: ... | Titular: ...">
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="pago-row">
+          <div class="pago-icon">💵</div>
+          <div class="flex-grow-1">
+            <label class="field-label">Efectivo</label>
+            <input type="text" class="form-control rounded-3" [(ngModel)]="form.pagoEfectivo"
+                   placeholder="Ej: Se paga contra entrega al repartidor">
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="pago-row">
+          <div class="pago-icon">📱</div>
+          <div class="flex-grow-1">
+            <label class="field-label">Pago Móvil Venezuela</label>
+            <input type="text" class="form-control rounded-3" [(ngModel)]="form.pagoPagoMovil"
+                   placeholder="Banco | Teléfono | C.I.: ...">
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="pago-row">
+          <div class="pago-icon">🇺🇸</div>
+          <div class="flex-grow-1">
+            <label class="field-label">Zelle</label>
+            <input type="text" class="form-control rounded-3" [(ngModel)]="form.pagoZelle"
+                   placeholder="Email o teléfono Zelle">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN: HORARIOS ══════════════════════════════════════════════════ -->
+  <div *ngIf="seccionActiva === 'horarios'" class="section-card animate-fade-in">
+    <div class="section-header">
+      <span class="section-icon">⏰</span>
+      <div>
+        <div class="section-title">Horario de Atención</div>
+        <div class="section-subtitle">Días y horas en que el restaurante atiende pedidos</div>
+      </div>
+    </div>
+
+    <div class="mt-3">
+      <div class="horario-row" *ngFor="let dia of form.horario; let i = index">
+        <div class="horario-day-name">
+          <span class="fw-bold small">{{ nombresDias[i] }}</span>
+        </div>
+        <div class="horario-toggle">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" [id]="'dia-' + i" [(ngModel)]="dia.activo">
+            <label class="form-check-label x-small fw-semibold" [for]="'dia-' + i"
+                   [class.text-success]="dia.activo" [class.text-muted]="!dia.activo">
+              {{ dia.activo ? 'Abierto' : 'Cerrado' }}
+            </label>
+          </div>
+        </div>
+        <div class="horario-times" [class.opacity-50]="!dia.activo">
+          <div class="d-flex align-items-center gap-2">
+            <div>
+              <label class="x-small text-muted d-block mb-1">Abre</label>
+              <input type="time" class="form-control form-control-sm rounded-3" [(ngModel)]="dia.apertura" [disabled]="!dia.activo">
+            </div>
+            <span class="text-muted mt-3">→</span>
+            <div>
+              <label class="x-small text-muted d-block mb-1">Cierra</label>
+              <input type="time" class="form-control form-control-sm rounded-3" [(ngModel)]="dia.cierre" [disabled]="!dia.activo">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview del horario -->
+    <div class="mt-4 p-3 bg-light rounded-3 border">
+      <div class="x-small fw-bold text-uppercase text-muted mb-2">Resumen</div>
+      <div *ngFor="let dia of form.horario; let i = index">
+        <div *ngIf="dia.activo" class="d-flex justify-content-between small py-1 border-bottom">
+          <span class="fw-semibold">{{ nombresDias[i] }}</span>
+          <span class="text-muted">{{ dia.apertura }} — {{ dia.cierre }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN: OPERACIÓN ══════════════════════════════════════════════ -->
+  <div *ngIf="seccionActiva === 'operacion'" class="section-card animate-fade-in">
+    <div class="section-header">
+      <span class="section-icon">🍽️</span>
+      <div>
+        <div class="section-title">Operación del Local</div>
+        <div class="section-subtitle">Configuración de mesas y capacidad</div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-12 col-md-6">
+        <label class="field-label">Cantidad de Mesas</label>
+        <div class="input-group">
+          <button class="btn btn-light border" (click)="form.cantidadMesas = form.cantidadMesas > 1 ? form.cantidadMesas - 1 : 1">−</button>
+          <input type="number" class="form-control text-center fw-bold" [(ngModel)]="form.cantidadMesas"
+                 min="1" max="100">
+          <button class="btn btn-light border" (click)="form.cantidadMesas = form.cantidadMesas + 1">+</button>
+        </div>
+        <div class="x-small text-muted mt-1">Número de mesas disponibles en el módulo Meseros</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ BOTÓN GUARDAR (bottom) ══════════════════════════════════════════ -->
+  <div class="d-flex justify-content-end mt-4">
+    <button class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm"
+            (click)="guardar()" [disabled]="guardando">
+      <span *ngIf="!guardando">💾 Guardar Cambios</span>
+      <span *ngIf="guardando" class="spinner-border spinner-border-sm me-2"></span>
+      <span *ngIf="guardando">Guardando...</span>
+    </button>
+  </div>
+
+</div>
+
+<!-- ══ LOADER ══════════════════════════════════════════════════════════════ -->
+<ng-template #loader>
+  <div class="vh-100 d-flex justify-content-center align-items-center">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+  </div>
+</ng-template>

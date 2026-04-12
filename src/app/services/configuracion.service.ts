@@ -12,6 +12,13 @@ export interface Configuracion {
   cantidadMesas: number;
   direccion?: string;
   telefono?: string;
+  activo?: boolean;
+  monedaDefaultTienda?: string;
+  pagoBancolombia?: string;
+  pagoBinance?: string;
+  pagoEfectivo?: string;
+  pagoPagoMovil?: string;
+  pagoZelle?: string;
 }
 
 @Injectable({ providedIn: 'root' })

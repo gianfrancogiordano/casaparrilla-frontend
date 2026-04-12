@@ -1,0 +1,111 @@
+<div class="page-wrapper">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">🧠 Base de Conocimiento</h1>
+      <p class="page-subtitle">
+        Edita lo que Valentina sabe sobre Casa Parrilla. Al guardar, se re-indexa automáticamente.
+      </p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline-secondary me-2" (click)="reset()" [disabled]="!hasChanges || saving">
+        Descartar cambios
+      </button>
+      <button
+        class="btn btn-premium"
+        (click)="save()"
+        [disabled]="!hasChanges || saving"
+      >
+        <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+        {{ saving ? 'Guardando...' : '💾 Guardar y Re-indexar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Success / Error alerts -->
+  <div class="alert alert-success d-flex align-items-center gap-2" *ngIf="saved">
+    <span>✅</span>
+    <div>
+      <strong>¡Guardado!</strong> Valentina está re-indexando la base de conocimiento en segundo plano.
+      Los nuevos datos estarán disponibles en ~30 segundos.
+    </div>
+  </div>
+  <div class="alert alert-danger d-flex align-items-center gap-2" *ngIf="error">
+    <span>❌</span> {{ error }}
+  </div>
+
+  <!-- Loading state -->
+  <div class="card editor-card" *ngIf="loading">
+    <div class="card-body text-center py-5">
+      <div class="spinner-border text-danger mb-3"></div>
+      <p class="text-muted">Cargando base de conocimiento...</p>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <div class="card editor-card" *ngIf="!loading">
+    <div class="card-header editor-header">
+      <div class="d-flex align-items-center gap-2">
+        <span class="file-icon">📄</span>
+        <code class="file-name">casaparrilla_info.txt</code>
+        <span class="badge bg-warning text-dark ms-2" *ngIf="hasChanges">Cambios sin guardar</span>
+      </div>
+      <div class="word-count text-muted">
+        {{ wordCount }} palabras
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <textarea
+        class="knowledge-editor"
+        [(ngModel)]="content"
+        placeholder="Escribe aquí todo lo que Valentina debe saber sobre Casa Parrilla:
+- Dirección exacta
+- Horarios de atención
+- Zona de delivery y costos
+- Políticas del restaurante
+- Información sobre el chef y la historia
+- Preguntas frecuentes
+- Redes sociales
+- Cualquier información especial..."
+        spellcheck="true"
+        lang="es"
+      ></textarea>
+    </div>
+
+    <!-- Tips footer -->
+    <div class="card-footer editor-footer">
+      <div class="tips">
+        <strong>💡 Tips:</strong>
+        Escribe en párrafos claros. Valentina entiende lenguaje natural — no necesitas formato especial.
+        Usa títulos en mayúsculas para separar secciones (ej: <code>HORARIOS:</code>, <code>DELIVERY:</code>).
+      </div>
+    </div>
+  </div>
+
+  <!-- Info boxes -->
+  <div class="info-grid" *ngIf="!loading">
+    <div class="info-box">
+      <div class="info-icon">🔄</div>
+      <div>
+        <strong>Re-indexación automática</strong>
+        <p>Al guardar, Valentina procesa el texto y actualiza sus vectores de búsqueda en ~30 segundos.</p>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-icon">🧠</div>
+      <div>
+        <strong>¿Qué agregar aquí?</strong>
+        <p>Dirección, horarios, zonas de delivery, políticas, historia del restaurante, contactos.</p>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-icon">💬</div>
+      <div>
+        <strong>Menú de productos</strong>
+        <p>Los productos y precios se toman del módulo de Productos — no los pongas aquí.</p>
+      </div>
+    </div>
+  </div>
+
+</div>

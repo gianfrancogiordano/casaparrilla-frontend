@@ -1,0 +1,169 @@
+.config-page {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+// Tabs de sección
+.section-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 0.45rem 1.1rem;
+  border: 1.5px solid #e2e8f0;
+  background: white;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.18s ease;
+
+  &:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+  }
+
+  &.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  }
+}
+
+// Card de sección
+.section-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  border: 1px solid #f1f5f9;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.section-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.section-subtitle {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+// Field label
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.03em;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+// Tasa card
+.tasa-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.tasa-flag {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.tasa-preview {
+  text-align: right;
+  flex-shrink: 0;
+  min-width: 90px;
+}
+
+// Pago row
+.pago-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid #e2e8f0;
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: #6366f1;
+    background: white;
+  }
+}
+
+.pago-icon {
+  font-size: 1.4rem;
+  padding-top: 1.5rem;
+  flex-shrink: 0;
+}
+
+// Animate
+.animate-fade-in {
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.x-small {
+  font-size: 0.72rem;
+}
+
+// ─── Horario rows ─────────────────────────────────────────────────────────
+.horario-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child { border-bottom: none; }
+}
+
+.horario-day-name {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.horario-toggle {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.horario-times {
+  flex-grow: 1;
+  transition: opacity 0.2s;
+
+  input[type="time"] {
+    min-width: 110px;
+  }
+}

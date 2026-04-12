@@ -43,6 +43,10 @@ export const routes: Routes = [
       { path: 'usuarios', component: UsuariosComponent },
       { path: 'clientes', component: ClientesComponent },
       { path: 'test-printer', component: TestPrinterComponent },
+      { path: 'configuracion', loadComponent: () => import('./pages/configuracion/configuracion.component').then(m => m.ConfiguracionComponent) },
+      { path: 'inbox', loadComponent: () => import('./pages/inbox/inbox.component').then(m => m.InboxComponent) },
+      { path: 'conocimiento', loadComponent: () => import('./pages/conocimiento/conocimiento.component').then(m => m.ConocimientoComponent) },
+
     ]
   },
   { path: '**', redirectTo: 'login', pathMatch: 'full' }

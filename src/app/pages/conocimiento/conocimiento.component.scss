@@ -1,0 +1,149 @@
+.page-wrapper {
+  padding: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* ─── Header ────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212121;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  color: #757575;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ─── Editor Card ───────────────────────────────── */
+.editor-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(33,33,33,0.07);
+  margin-bottom: 20px;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.file-icon { font-size: 1rem; }
+
+.file-name {
+  font-size: 0.82rem;
+  color: #424242;
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.word-count {
+  font-size: 0.78rem;
+}
+
+/* ─── Textarea Editor ──────────────────────────── */
+.knowledge-editor {
+  width: 100%;
+  min-height: 480px;
+  padding: 20px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: 'Inter', monospace;
+  font-size: 0.88rem;
+  line-height: 1.7;
+  color: #212121;
+  background: #fff;
+  display: block;
+
+  &::placeholder { color: #bdbdbd; }
+}
+
+.editor-footer {
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 16px;
+
+  .tips {
+    font-size: 0.8rem;
+    color: #757575;
+    line-height: 1.5;
+
+    code {
+      background: #f0f0f0;
+      padding: 0 5px;
+      border-radius: 3px;
+      font-size: 0.78rem;
+      color: #d32f2f;
+    }
+  }
+}
+
+/* ─── Info Grid ─────────────────────────────────── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.info-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(33,33,33,0.05);
+
+  .info-icon { font-size: 1.4rem; flex-shrink: 0; }
+  strong { font-size: 0.85rem; color: #212121; display: block; margin-bottom: 4px; }
+  p { font-size: 0.78rem; color: #757575; margin: 0; line-height: 1.4; }
+}
+
+/* ─── Responsive ────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-wrapper { padding: 16px; }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    button { width: 100%; }
+  }
+
+  .knowledge-editor { min-height: 320px; font-size: 0.85rem; }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

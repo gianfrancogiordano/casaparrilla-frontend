@@ -40,6 +40,7 @@ export class NuevoDeliveryComponent implements OnInit {
   items: OrderItem[] = [];
 
   // Datos Delivery
+  customerName = '';
   customerPhone = '';
   deliveryAddress = '';
   
@@ -114,6 +115,7 @@ export class NuevoDeliveryComponent implements OnInit {
   precargarOrden(order: any): void {
     this.orderNumberToEdit = order.orderNumber;
     this.items = [...order.items];
+    this.customerName = order.customerName || '';
     this.customerPhone = order.customerPhone || '';
     this.deliveryAddress = order.deliveryAddress || '';
     if (order.clientId && order.clientId._id) {
@@ -230,10 +232,12 @@ export class NuevoDeliveryComponent implements OnInit {
 
     if (this.clienteVinculado) {
       payload.clientId = this.clienteVinculado._id;
+      payload.customerName = this.clienteVinculado.name;
       payload.customerPhone = this.customerPhone || this.clienteVinculado.phone;
       payload.deliveryAddress = this.deliveryAddress || (this.clienteVinculado.addresses?.length ? this.clienteVinculado.addresses[0].street : '');
     } else {
       payload.clientId = null;
+      payload.customerName = this.customerName;
       payload.customerPhone = this.customerPhone;
       payload.deliveryAddress = this.deliveryAddress;
     }
@@ -297,6 +301,7 @@ export class NuevoDeliveryComponent implements OnInit {
 
   vincularCliente(cliente: Client): void {
     this.clienteVinculado = cliente;
+    this.customerName = cliente.name || '';
     this.customerPhone = cliente.phone || '';
     this.deliveryAddress = cliente.addresses && cliente.addresses.length > 0 ? cliente.addresses[0].street : '';
     this.mostrarModalCliente = false;
@@ -320,6 +325,7 @@ export class NuevoDeliveryComponent implements OnInit {
 
   desvincularCliente(): void {
     this.clienteVinculado = null;
+    this.customerName = '';
     this.customerPhone = '';
     this.deliveryAddress = '';
   }

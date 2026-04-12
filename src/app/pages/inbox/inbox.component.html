@@ -1,0 +1,125 @@
+<div class="inbox-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIDEBAR — Session List
+       Mobile: visible when mobileView === 'list'
+       Desktop: always visible (left column)
+  ════════════════════════════════════════════════════════════ -->
+  <aside class="inbox-sidebar" [class.hidden-mobile]="mobileView === 'chat'">
+    <header class="sidebar-header">
+      <div class="sidebar-title">
+        <span class="wa-icon">💬</span>
+        <h1>WhatsApp Inbox</h1>
+      </div>
+      <span class="unread-badge" *ngIf="totalUnread > 0">{{ totalUnread }}</span>
+    </header>
+
+    <div class="sessions-list">
+      <div
+        class="session-item"
+        *ngFor="let session of sessions"
+        [class.active]="selectedSession?.phone === session.phone"
+        (click)="selectSession(session)"
+      >
+        <div class="avatar">{{ (session.clientName || 'C').charAt(0).toUpperCase() }}</div>
+        <div class="session-info">
+          <div class="session-top">
+            <span class="session-name">{{ session.clientName || session.phone }}</span>
+            <span class="session-time">{{ formatTime(session.lastMessageAt) }}</span>
+          </div>
+          <div class="session-bottom">
+            <span class="session-preview">{{ session.lastMessagePreview || 'Sin mensajes' }}</span>
+            <span class="unread-dot" *ngIf="session.unreadCount > 0">{{ session.unreadCount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="sessions.length === 0">
+        <span class="empty-icon">📭</span>
+        <p>No hay conversaciones aún.</p>
+        <small>Los chats aparecerán aquí cuando los clientes escriban a Valentina.</small>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CHAT PANEL — Message Thread
+       Mobile: visible when mobileView === 'chat'
+       Desktop: always visible (right column)
+  ════════════════════════════════════════════════════════════ -->
+  <main class="chat-panel" [class.hidden-mobile]="mobileView === 'list'">
+
+    <!-- Chat Header -->
+    <header class="chat-header" *ngIf="selectedSession; else noSelection">
+      <button class="back-btn mobile-only" (click)="goBackToList()">
+        ← Volver
+      </button>
+      <div class="avatar">{{ (selectedSession.clientName || 'C').charAt(0).toUpperCase() }}</div>
+      <div class="chat-header-info">
+        <span class="chat-name">{{ selectedSession.clientName || selectedSession.phone }}</span>
+        <span class="chat-phone">{{ selectedSession.phone }}</span>
+      </div>
+      <div class="ai-toggle" (click)="toggleAI(selectedSession)">
+        <span class="ai-label" [class.active]="selectedSession.isAiActive">
+          {{ selectedSession.isAiActive ? '🤖 Valentina' : '👤 Tú' }}
+        </span>
+        <div class="toggle-switch" [class.on]="selectedSession.isAiActive">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- No session selected -->
+    <ng-template #noSelection>
+      <div class="no-chat-selected desktop-only">
+        <span class="empty-icon">💬</span>
+        <p>Selecciona una conversación</p>
+        <small>Los chats de WhatsApp aparecerán en tiempo real.</small>
+      </div>
+    </ng-template>
+
+    <!-- Messages Container -->
+    <div class="messages-container" #messagesContainer *ngIf="selectedSession">
+      <div class="loading-msgs" *ngIf="loading">
+        <span>Cargando mensajes...</span>
+      </div>
+
+      <div
+        class="message-bubble"
+        *ngFor="let msg of messages"
+        [class.user]="msg.role === 'user'"
+        [class.ai]="msg.role === 'ai'"
+        [class.human]="msg.role === 'human'"
+      >
+        <div class="bubble-sender" *ngIf="msg.role !== 'user'">
+          {{ msg.role === 'ai' ? '🤖 Valentina' : '👤 Tú' }}
+        </div>
+        <div class="bubble-content">{{ msg.content }}</div>
+        <div class="bubble-time">{{ formatMessageTime(msg.createdAt) }}</div>
+      </div>
+    </div>
+
+    <!-- Message Input -->
+    <footer class="chat-footer" *ngIf="selectedSession && !selectedSession.isAiActive">
+      <textarea
+        class="message-input"
+        [(ngModel)]="newMessage"
+        placeholder="Escribe un mensaje..."
+        rows="1"
+        (keydown.enter)="$event.preventDefault(); sendMessage()"
+      ></textarea>
+      <button
+        class="send-btn"
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim() || sendingMessage"
+      >
+        {{ sendingMessage ? '...' : '➤' }}
+      </button>
+    </footer>
+
+    <div class="ai-mode-notice" *ngIf="selectedSession?.isAiActive">
+      <span>🤖 Valentina está respondiendo — desactívala para responder tú.</span>
+    </div>
+
+  </main>
+</div>

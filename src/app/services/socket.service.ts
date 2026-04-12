@@ -10,6 +10,8 @@ export class SocketService {
   private socket: Socket;
   private orderCreatedSubject = new Subject<any>();
   private orderUpdatedSubject = new Subject<any>();
+  private chatNewMessageSubject = new Subject<any>();
+  private chatSessionUpdatedSubject = new Subject<any>();
 
   constructor() {
     this.socket = io(environment.apiUrl);
@@ -29,6 +31,15 @@ export class SocketService {
     this.socket.on('order_updated', (data) => {
       this.orderUpdatedSubject.next(data);
     });
+
+    // ─── WhatsApp Inbox events ───────────────────────────────────────────────
+    this.socket.on('chat:new_message', (data) => {
+      this.chatNewMessageSubject.next(data);
+    });
+
+    this.socket.on('chat:session_updated', (data) => {
+      this.chatSessionUpdatedSubject.next(data);
+    });
   }
 
   onOrderCreated(): Observable<any> {
@@ -37,6 +48,14 @@ export class SocketService {
 
   onOrderUpdated(): Observable<any> {
     return this.orderUpdatedSubject.asObservable();
+  }
+
+  onChatNewMessage(): Observable<any> {
+    return this.chatNewMessageSubject.asObservable();
+  }
+
+  onChatSessionUpdated(): Observable<any> {
+    return this.chatSessionUpdatedSubject.asObservable();
   }
 
   emit(event: string, data: any) {

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { PushNotificationsService } from '../../services/push-notifications.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private pushService: PushNotificationsService,
   ) {
     this.loginForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -37,6 +39,11 @@ export class LoginComponent {
     this.authService.login(name, password).subscribe({
       next: () => {
         this.isLoading = false;
+        // Pedir permiso de notificaciones AQUÍ — el click del botón login
+        // es el gesto de usuario que los navegadores requieren
+        if (this.authService.isAdmin() || this.authService.isMesero()) {
+          this.pushService.initAndRequestPermission();
+        }
         this.router.navigate(['/']);
       },
       error: (err) => {
