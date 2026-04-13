@@ -4,26 +4,37 @@ import { environment } from '../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface PnlReport {
-  periodo: { from: string; to: string };
-  // Ingresos
+  periodo: { from: string; to: string; diasPeriodo: number; factorProrrateo: number };
+
+  // ── Nivel 1: Ingresos ────────────────────────────────────────────────────
   ingresos: number;
   cantidadOrdenes: number;
   ticketPromedio: number;
-  // Food cost
-  costoVenta: number;
+
+  // ── Nivel 2: COGS (Costo de Ventas Real = Compras a Proveedores) ─────────
+  costoVentas: number;
+  costoVentasPct: number;
+
+  // ── KPI Analítico: Food Cost Teórico (basado en recetas — no resta utilidad)
+  foodCostTeorico: number;
   foodCostPct: number;
-  // Egresos desglosados
-  gastosVariables: number;
-  gastosFijos: number;
-  nominaPeriodo: number;
-  comprasPeriodo: number;
-  totalEgresos: number;
-  // Utilidades
+
+  // ── Nivel 3: Utilidad Bruta ──────────────────────────────────────────────
   utilidadBruta: number;
-  utilidadNeta: number;
   margenBruto: number;
+
+  // ── Gastos Operativos desglosados ────────────────────────────────────────
+  gastosVariables: number;
+  gastosFijos: number;        // prorrateado al período
+  gastosFijosMensual: number; // referencia del valor mensual completo
+  nominaPeriodo: number;
+  gastosOperativos: number;
+
+  // ── Nivel 4: Utilidad Neta ───────────────────────────────────────────────
+  utilidadNeta: number;
   margenNeto: number;
-  // Desgloses
+
+  // ── Desgloses ────────────────────────────────────────────────────────────
   ventasPorMetodo: Record<string, number>;
   ventasPorTipo: Record<string, { ingresos: number; cantidad: number }>;
   gastosPorCategoria: Record<string, number>;

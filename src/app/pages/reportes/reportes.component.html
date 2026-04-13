@@ -52,9 +52,9 @@
       <div class="col-6 col-lg-3">
         <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-orange">
           <div class="card-body p-3">
-            <span class="metric-icon">🍖</span>
-            <h3 class="fw-bold metric-value mb-0 mt-2">{{ pnl.costoVenta | currency:'USD':'symbol':'1.2-2' }}</h3>
-            <p class="text-muted small mb-0 mt-1">Food Cost Teórico</p>
+            <span class="metric-icon">🛒</span>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ pnl.costoVentas | currency:'USD':'symbol':'1.2-2' }}</h3>
+            <p class="text-muted small mb-0 mt-1">Costo de Ventas</p>
           </div>
         </div>
       </div>
@@ -62,8 +62,8 @@
         <div class="card border-0 shadow-sm rounded-4 h-100 metric-card metric-red">
           <div class="card-body p-3">
             <span class="metric-icon">📤</span>
-            <h3 class="fw-bold metric-value mb-0 mt-2">{{ pnl.totalEgresos | currency:'USD':'symbol':'1.2-2' }}</h3>
-            <p class="text-muted small mb-0 mt-1">Total Egresos</p>
+            <h3 class="fw-bold metric-value mb-0 mt-2">{{ pnl.gastosOperativos | currency:'USD':'symbol':'1.2-2' }}</h3>
+            <p class="text-muted small mb-0 mt-1">Gastos Operativos</p>
           </div>
         </div>
       </div>
@@ -84,21 +84,35 @@
       <!-- P&L Detallado -->
       <div class="col-12 col-xl-7">
         <div class="card border-0 shadow-sm rounded-4 h-100">
-          <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4">
+          <div class="card-header bg-white border-0 rounded-top-4 pt-3 pb-2 px-4 d-flex justify-content-between align-items-center">
             <h6 class="fw-bold mb-0">📋 Estado de Resultados</h6>
+            <span class="badge bg-light text-muted small">{{ pnl.periodo.diasPeriodo }} días</span>
           </div>
           <div class="card-body px-4">
-            <!-- Ingresos -->
+
+            <!-- ── NIVEL 1: INGRESOS ─────────────────────────────── -->
+            <div class="pnl-section-label mb-1">
+              <span class="small text-uppercase text-muted fw-bold">Ingresos</span>
+            </div>
             <div class="pnl-line">
-              <span class="pnl-label">Ingresos por Ventas</span>
+              <span class="pnl-label">Ventas del Período</span>
               <span class="pnl-value fw-bold">{{ pnl.ingresos | currency:'USD':'symbol':'1.2-2' }}</span>
             </div>
-            <!-- Food Cost -->
             <div class="pnl-line pnl-sub">
-              <span class="pnl-label text-muted">− Food Cost Teórico ({{ pnl.foodCostPct }}%)</span>
-              <span class="pnl-value text-danger">−{{ pnl.costoVenta | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="pnl-label text-muted">{{ pnl.cantidadOrdenes }} órdenes · Ticket promedio {{ pnl.ticketPromedio | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span></span>
             </div>
-            <!-- Utilidad Bruta -->
+
+            <!-- ── NIVEL 2: COGS ─────────────────────────────────── -->
+            <div class="pnl-section-label mt-3 mb-1">
+              <span class="small text-uppercase text-muted fw-bold">Costo de Ventas (COGS)</span>
+            </div>
+            <div class="pnl-line pnl-sub">
+              <span class="pnl-label text-muted">🛒 Compras a Proveedores ({{ pnl.costoVentasPct }}% ventas)</span>
+              <span class="pnl-value text-danger">−{{ pnl.costoVentas | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+
+            <!-- ── NIVEL 3: UTILIDAD BRUTA ───────────────────────── -->
             <div class="pnl-line pnl-subtotal">
               <span class="pnl-label fw-bold">= Utilidad Bruta</span>
               <span class="pnl-value fw-bold" [ngClass]="getMargenClass(pnl.margenBruto)">
@@ -106,36 +120,33 @@
                 <span class="small">({{ pnl.margenBruto }}%)</span>
               </span>
             </div>
-            <!-- Separador Egresos -->
+
+            <!-- ── GASTOS OPERATIVOS ──────────────────────────────── -->
             <div class="pnl-section-label mt-3 mb-1">
-              <span class="small text-uppercase text-muted fw-bold tracking-wide">Egresos Operativos</span>
+              <span class="small text-uppercase text-muted fw-bold">Gastos Operativos</span>
             </div>
-            <!-- Gastos Fijos -->
             <div class="pnl-line pnl-sub">
-              <span class="pnl-label text-muted">📌 Gastos Fijos (catálogo)</span>
+              <span class="pnl-label text-muted">📌 Gastos Fijos
+                <span class="badge bg-light text-muted ms-1">
+                  prorrateado {{ pnl.periodo.factorProrrateo }}%
+                </span>
+              </span>
               <span class="pnl-value text-danger">−{{ pnl.gastosFijos | currency:'USD':'symbol':'1.2-2' }}</span>
             </div>
-            <!-- Gastos Variables -->
             <div class="pnl-line pnl-sub">
               <span class="pnl-label text-muted">🔄 Gastos Variables</span>
               <span class="pnl-value text-danger">−{{ pnl.gastosVariables | currency:'USD':'symbol':'1.2-2' }}</span>
             </div>
-            <!-- Nómina -->
             <div class="pnl-line pnl-sub">
               <span class="pnl-label text-muted">💼 Nómina Pagada</span>
               <span class="pnl-value text-danger">−{{ pnl.nominaPeriodo | currency:'USD':'symbol':'1.2-2' }}</span>
             </div>
-            <!-- Compras -->
-            <div class="pnl-line pnl-sub">
-              <span class="pnl-label text-muted">🛒 Compras a Proveedores</span>
-              <span class="pnl-value text-danger">−{{ pnl.comprasPeriodo | currency:'USD':'symbol':'1.2-2' }}</span>
-            </div>
-            <!-- Total Egresos -->
             <div class="pnl-line pnl-subtotal">
-              <span class="pnl-label fw-semibold text-muted">Total Egresos</span>
-              <span class="pnl-value text-danger fw-semibold">−{{ pnl.totalEgresos | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="pnl-label fw-semibold text-muted">Total Gastos Operativos</span>
+              <span class="pnl-value text-danger fw-semibold">−{{ pnl.gastosOperativos | currency:'USD':'symbol':'1.2-2' }}</span>
             </div>
-            <!-- Utilidad Neta -->
+
+            <!-- ── NIVEL 4: UTILIDAD NETA ────────────────────────── -->
             <div class="pnl-line pnl-total">
               <span class="pnl-label fw-bold fs-5">= UTILIDAD NETA</span>
               <span class="pnl-value fw-bold fs-5" [ngClass]="getUtilidadClass()">
@@ -144,22 +155,21 @@
               </span>
             </div>
 
-            <!-- Info adicional -->
-            <div class="mt-4 p-3 bg-light rounded-3">
-              <div class="row text-center">
-                <div class="col-4">
-                  <p class="text-muted small mb-0">Órdenes</p>
-                  <p class="fw-bold mb-0">{{ pnl.cantidadOrdenes }}</p>
-                </div>
-                <div class="col-4">
-                  <p class="text-muted small mb-0">Ticket Promedio</p>
-                  <p class="fw-bold mb-0">{{ pnl.ticketPromedio | currency:'USD':'symbol':'1.2-2' }}</p>
-                </div>
-                <div class="col-4">
-                  <p class="text-muted small mb-0">Food Cost</p>
-                  <p class="fw-bold mb-0" [ngClass]="getFoodCostClass(pnl.foodCostPct)">{{ pnl.foodCostPct }}%</p>
-                </div>
+            <!-- ── KPI COCINA: Food Cost Teórico ─────────────────── -->
+            <div class="mt-4 p-3 rounded-3" style="background: #f8f9ff; border: 1px dashed #dce0ff;">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="fw-bold small">🔬 KPI Eficiencia de Cocina</span>
+                <span class="badge rounded-pill" [ngClass]="getFoodCostClass(pnl.foodCostPct)">
+                  Food Cost: {{ pnl.foodCostPct }}%
+                </span>
               </div>
+              <p class="text-muted mb-1" style="font-size: 0.78rem;">
+                Costo teórico calculado por recetas: <strong>{{ pnl.foodCostTeorico | currency:'USD':'symbol':'1.2-2' }}</strong>
+                · Este valor <em>no resta</em> la utilidad (ya está implícito en las compras reales).
+              </p>
+              <p class="text-muted mb-0" style="font-size: 0.78rem;">
+                Si el % supera el COGS real ({{ pnl.costoVentasPct }}%), puede haber mermas o desperdicio no controlado.
+              </p>
             </div>
           </div>
         </div>
