@@ -59,19 +59,23 @@ export class CocinaComponent implements OnInit, OnDestroy {
         if (!this.tieneItemsKitchen(order)) return;
         const idx = this.pedidos.findIndex((p) => p._id === order._id);
         if (idx >= 0) {
-          this.pedidos[idx] = order;
+          // Replace existing
+          const updated = [...this.pedidos];
+          updated[idx] = order;
+          this.pedidos = updated;
         } else {
-          this.pedidos.push(order);
+          // Add new — use spread so Angular detects the new array reference
+          this.pedidos = [...this.pedidos, order];
         }
-        // Sort: oldest first (most urgent)
         this.sortPedidos();
+        this.cdr.detectChanges();
       }),
     );
 
     this.subs.add(
       this.socketService.onKitchenOrderUpdated().subscribe((order: Order) => {
-        // Remove from KDS when marked as Listo or beyond
         this.pedidos = this.pedidos.filter((p) => p._id !== order._id);
+        this.cdr.detectChanges();
       }),
     );
 
@@ -80,6 +84,7 @@ export class CocinaComponent implements OnInit, OnDestroy {
       this.socketService.onOrderUpdated().subscribe((order: Order) => {
         if (order.status !== 'En Cocina') {
           this.pedidos = this.pedidos.filter((p) => p._id !== order._id);
+          this.cdr.detectChanges();
         }
       }),
     );
