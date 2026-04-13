@@ -186,6 +186,14 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   onAction(order: Order): void {
     const nextStatus = this.getNextStatus(order.status);
     if (!nextStatus) return;
+
+    // Bloquear "Entregado" si el pedido no está pagado
+    if (nextStatus === 'Entregado' && order.paymentInfo?.status !== 'Pagado') {
+      this.alertService.toast('💳 El pedido debe estar pagado antes de entregarse', 'warning');
+      this.abrirModalCobro(order); // Abre el modal de cobro directamente
+      return;
+    }
+
     this.updateStatus(order, nextStatus);
   }
 
