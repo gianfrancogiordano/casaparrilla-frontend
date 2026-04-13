@@ -111,6 +111,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
         this.pendingDeliveriesCount = orders.filter(o => 
           o.orderType === 'Delivery' && 
           o.status !== 'Pagado' && 
+          o.status !== 'Entregado' &&
           o.status !== 'Cancelado'
         ).length;
       }
