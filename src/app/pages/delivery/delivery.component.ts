@@ -70,10 +70,10 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   loadDeliveries(): void {
     this.ordersService.getAll().subscribe({
       next: (orders) => {
-        // Filtrar solo pedidos de Delivery que no estén Pagados o Cancelados
-        this.deliveryOrders = orders.filter(o => 
-          o.orderType === 'Delivery' && 
-          o.status !== 'Pagado' && 
+        // Mostrar pedidos Delivery activos (excluir Entregado y Cancelado)
+        this.deliveryOrders = orders.filter(o =>
+          o.orderType === 'Delivery' &&
+          o.status !== 'Entregado' &&
           o.status !== 'Cancelado'
         ).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       }
@@ -96,14 +96,14 @@ export class DeliveryComponent implements OnInit, OnDestroy {
       if (updatedOrder.orderType === 'Delivery') {
         const index = this.deliveryOrders.findIndex(o => o._id === updatedOrder._id);
         if (index !== -1) {
-          // Si el pedido pasó a 'Pagado' o 'Cancelado', lo quitamos
-          if (updatedOrder.status === 'Pagado' || updatedOrder.status === 'Cancelado') {
+          // Entregado y Cancelado salen del dashboard
+          if (updatedOrder.status === 'Entregado' || updatedOrder.status === 'Cancelado') {
             this.deliveryOrders.splice(index, 1);
           } else {
+            // Actualizamos (incluyendo cambios en paymentInfo)
             this.deliveryOrders[index] = updatedOrder;
           }
-        } else if (updatedOrder.status !== 'Pagado' && updatedOrder.status !== 'Cancelado') {
-          // Si no estaba y es activo, lo agregamos
+        } else if (updatedOrder.status !== 'Entregado' && updatedOrder.status !== 'Cancelado') {
           this.deliveryOrders.push(updatedOrder);
           this.deliveryOrders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
         }
@@ -132,16 +132,25 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   }
 
   async updateStatus(order: Order, nextStatus: string): Promise<void> {
-    // LÓGICA ESPECIAL PARA "EN COCINA" (ENVÍO A COCINA + IMPRESIÓN)
+    // ── REGLA: Parrillas/Deliveries digitales deben estar pagas antes de ir a cocina ──
     if (nextStatus === 'En Cocina') {
+      const isPaid = order.paymentInfo?.status === 'Pagado';
+      if (!isPaid) {
+        const esCash = await this.alertService.confirm(
+          '⚠️ Pedido sin pago registrado',
+          'Este pedido no tiene pago confirmado. Los pedidos con Pago Móvil, Zelle o Bancolombia deben cobrarse antes de salir a cocina.\n\n¿Es un pedido en EFECTIVO y debe salir sin pago previo?',
+          'Sí, es efectivo — enviar a cocina'
+        );
+        if (!esCash) return; // User debe usar 💳 para cobrar primero
+      }
+
+      // Envío a cocina con comanda de impresión
       const itemsParaCocina = order.items.filter(i => i.requiresKitchen && !i.sentToCocina);
-      
       if (itemsParaCocina.length > 0) {
-        // Verificar impresora antes de proceder (igual que en Meseros)
         if (!this.printerService.conectado()) {
           const continuar = await this.alertService.confirm(
-            'Impresora No Conectada', 
-            '¿Deseas enviar el pedido a cocina de todas formas (sin imprimir)?', 
+            'Impresora No Conectada',
+            '¿Deseas enviar el pedido a cocina de todas formas (sin imprimir)?',
             'Sí, enviar sin imprimir'
           );
           if (!continuar) return;
@@ -150,14 +159,11 @@ export class DeliveryComponent implements OnInit, OnDestroy {
         this.ordersService.sendToKitchen(order._id).subscribe({
           next: (updatedOrder) => {
             this.alertService.toast(`Pedido #${order.orderNumber} enviado a cocina`);
-            
-            // Imprimir comanda si la impresora está disponible
             if (this.printerService.conectado()) {
               const ordenParcial = { ...updatedOrder, items: itemsParaCocina };
               this.printerService.imprimirComanda(ordenParcial, 'DELIVERY')
                 .catch(() => this.alertService.toast(`⚠️ Falla en impresora`, 'warning'));
             } else {
-              // DEBUG: Ver ticket en consola si no hay impresora
               const ordenParcial = { ...updatedOrder, items: itemsParaCocina };
               this.printerService.verTicketEnConsola(ordenParcial, 'DELIVERY');
               this.alertService.toast(`Ticket generado en consola (Debug)`, 'info');
@@ -169,11 +175,9 @@ export class DeliveryComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Actualización de estado normal para los demás casos
+    // Actualización de estado normal
     this.ordersService.updateOrderStatus(order._id, nextStatus).subscribe({
-      next: () => {
-        this.alertService.toast(`Estado actualizado a: ${nextStatus}`);
-      },
+      next: () => this.alertService.toast(`Estado actualizado a: ${nextStatus}`),
       error: () => this.alertService.error('Error al actualizar el estado')
     });
   }
@@ -181,12 +185,7 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   onAction(order: Order): void {
     const nextStatus = this.getNextStatus(order.status);
     if (!nextStatus) return;
-
-    if (nextStatus === 'Pagado') {
-      this.abrirModalCobro(order);
-    } else {
-      this.updateStatus(order, nextStatus);
-    }
+    this.updateStatus(order, nextStatus);
   }
 
   async onCancel(order: Order): Promise<void> {
@@ -224,18 +223,20 @@ export class DeliveryComponent implements OnInit, OnDestroy {
     if (!this.ordenAProcesar) return;
     this.cobrando = true;
     this.ordersService.payOrder(this.ordenAProcesar._id, this.metodoPago).subscribe({
-      next: () => {
-        // Remover de la lista local manualmente para respuesta inmediata (el socket también lo hará)
-        this.deliveryOrders = this.deliveryOrders.filter(o => o._id !== this.ordenAProcesar?._id);
-        
+      next: (updatedOrder) => {
+        // Actualizar la card con el nuevo paymentInfo — NO sacar del dashboard
+        const index = this.deliveryOrders.findIndex(o => o._id === updatedOrder._id);
+        if (index !== -1) {
+          this.deliveryOrders[index] = { ...this.deliveryOrders[index], paymentInfo: updatedOrder.paymentInfo };
+        }
         this.cobrando = false;
         this.mostrarModalCobro = false;
         this.ordenAProcesar = null;
-        this.alertService.toast('¡Pago registrado!');
+        this.alertService.toast('¡Pago registrado! ✅');
       },
-      error: () => { 
-        this.cobrando = false; 
-        this.alertService.error('Error al registrar el pago.'); 
+      error: () => {
+        this.cobrando = false;
+        this.alertService.error('Error al registrar el pago.');
       },
     });
   }
@@ -252,11 +253,11 @@ export class DeliveryComponent implements OnInit, OnDestroy {
 
   getNextStatus(currentStatus: string): string | null {
     const flow: Record<string, string> = {
-      'Recibido': 'En Cocina',
-      'Abierta': 'En Cocina',
+      'Recibido':  'En Cocina',
+      'Abierta':   'En Cocina',
       'En Cocina': 'Lista',
-      'Lista': 'En Camino',
-      'En Camino': 'Pagado'
+      'Lista':     'En Camino',
+      'En Camino': 'Entregado',   // Entregado saca del dashboard
     };
     return flow[currentStatus] || null;
   }

@@ -40,9 +40,14 @@
     <div class="order-card" *ngFor="let order of deliveryOrders" [ngClass]="getUrgencyClass(order.createdAt)">
       <div class="card-header">
         <span class="order-number">#{{ order.orderNumber }}</span>
-        <span class="order-status badge" [attr.data-status]="order.status">
-          {{ order.status }}
-        </span>
+        <div class="header-badges">
+          <span class="order-status badge" [attr.data-status]="order.status">
+            {{ order.status }}
+          </span>
+          <span class="paid-badge" *ngIf="order.paymentInfo?.status === 'Pagado'">
+            ✅ {{ order.paymentInfo?.method || 'Pagado' }}
+          </span>
+        </div>
       </div>
 
       <div class="card-body">
@@ -80,17 +85,24 @@
       </div>
 
       <footer class="card-footer d-flex gap-2 align-items-stretch">
-        <button class="btn-cancel" 
+        <button class="btn-cancel"
           (click)="onCancel(order)"
           title="Cancelar Pedido">
           <i class="bi bi-x-lg"></i>
         </button>
-        <button class="btn-edit" 
+        <button class="btn-edit"
           [routerLink]="['/delivery/editar', order._id]"
           title="Editar Pedido">
           <i class="bi bi-pencil"></i>
         </button>
-        <button class="btn-action flex-grow-1" 
+        <!-- Botón de cobro INDEPENDIENTE del flujo -->
+        <button class="btn-pay"
+          (click)="abrirModalCobro(order)"
+          [class.btn-pay-done]="order.paymentInfo?.status === 'Pagado'"
+          title="{{ order.paymentInfo?.status === 'Pagado' ? 'Ver/cambiar pago' : 'Cobrar pedido' }}">
+          {{ order.paymentInfo?.status === 'Pagado' ? '✅' : '💳' }}
+        </button>
+        <button class="btn-action flex-grow-1"
           *ngIf="getNextStatus(order.status) as next"
           (click)="onAction(order)"
           [disabled]="!next">
