@@ -70,10 +70,11 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   loadDeliveries(): void {
     this.ordersService.getAll().subscribe({
       next: (orders) => {
-        // Mostrar pedidos Delivery activos (excluir Entregado y Cancelado)
+        // Mostrar pedidos Delivery activos (excluir Entregado, Pagado -legacy- y Cancelado)
         this.deliveryOrders = orders.filter(o =>
           o.orderType === 'Delivery' &&
           o.status !== 'Entregado' &&
+          o.status !== 'Pagado' &&
           o.status !== 'Cancelado'
         ).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
       }
