@@ -31,7 +31,7 @@ export class CocinaComponent implements OnInit, OnDestroy {
     // Update timers every second
     this.timerInterval = setInterval(() => {
       this.now = Date.now();
-      this.cdr.markForCheck();
+      this.cdr.detectChanges();
     }, 1000);
   }
 
@@ -47,6 +47,7 @@ export class CocinaComponent implements OnInit, OnDestroy {
         this.pedidos = orders.filter(
           (o) => o.status === 'En Cocina' && this.tieneItemsKitchen(o),
         );
+        this.sortPedidos();
         this.cargando = false;
       },
       error: () => { this.cargando = false; },
@@ -108,11 +109,12 @@ export class CocinaComponent implements OnInit, OnDestroy {
     return order.items.filter((i) => i.requiresKitchen);
   }
 
-  /** Elapsed seconds since kitchenSentAt */
+  /** Elapsed seconds since kitchenSentAt (fallback: updatedAt) */
   elapsedSeconds(order: Order): number {
-    const sentAt = (order as any).kitchenSentAt;
+    const sentAt = (order as any).kitchenSentAt ?? (order as any).updatedAt;
     if (!sentAt) return 0;
-    return Math.floor((this.now - new Date(sentAt).getTime()) / 1000);
+    const elapsed = Math.floor((this.now - new Date(sentAt).getTime()) / 1000);
+    return Math.max(0, elapsed);
   }
 
   formatElapsed(order: Order): string {
@@ -138,10 +140,11 @@ export class CocinaComponent implements OnInit, OnDestroy {
   }
 
   private sortPedidos(): void {
-    this.pedidos.sort((a, b) => {
-      const aAt = (a as any).kitchenSentAt ? new Date((a as any).kitchenSentAt).getTime() : 0;
-      const bAt = (b as any).kitchenSentAt ? new Date((b as any).kitchenSentAt).getTime() : 0;
-      return aAt - bAt; // oldest first
+    this.pedidos = [...this.pedidos].sort((a, b) => {
+      // Use kitchenSentAt first, fallback to updatedAt (oldest = most urgent = first)
+      const aAt = new Date((a as any).kitchenSentAt ?? (a as any).updatedAt ?? 0).getTime();
+      const bAt = new Date((b as any).kitchenSentAt ?? (b as any).updatedAt ?? 0).getTime();
+      return aAt - bAt;
     });
   }
 }
