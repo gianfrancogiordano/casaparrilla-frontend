@@ -93,7 +93,7 @@ export class MeserosComponent implements OnInit, OnDestroy {
   }
 
   abrirMesa(mesa: MesaState): void {
-    this.router.navigate(['/meseros', mesa.numero]);
+    this.router.navigate(['/mesas', mesa.numero]);
   }
 
   goToDelivery(): void {

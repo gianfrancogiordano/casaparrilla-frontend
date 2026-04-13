@@ -300,7 +300,7 @@ export class MesaDetalleComponent implements OnInit {
       next: () => {
         this.liberando = false;
         this.mostrarModalLiberar = false;
-        setTimeout(() => this.router.navigate(['/meseros']), 1200);
+        setTimeout(() => this.router.navigate(['/mesas']), 1200);
       },
       error: () => {
         this.liberando = false;
@@ -375,5 +375,5 @@ export class MesaDetalleComponent implements OnInit {
     return 'Cliente VIP';
   }
 
-  volver(): void { this.router.navigate(['/meseros']); }
+  volver(): void { this.router.navigate(['/mesas']); }
 }

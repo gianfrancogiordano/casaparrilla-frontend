@@ -12,6 +12,8 @@ export class SocketService {
   private orderUpdatedSubject = new Subject<any>();
   private chatNewMessageSubject = new Subject<any>();
   private chatSessionUpdatedSubject = new Subject<any>();
+  private kitchenNewOrderSubject = new Subject<any>();
+  private kitchenOrderUpdatedSubject = new Subject<any>();
 
   constructor() {
     this.socket = io(environment.apiUrl);
@@ -40,6 +42,15 @@ export class SocketService {
     this.socket.on('chat:session_updated', (data) => {
       this.chatSessionUpdatedSubject.next(data);
     });
+
+    // ─── Kitchen Display System events ───────────────────────────────────────
+    this.socket.on('kitchen:new_order', (data) => {
+      this.kitchenNewOrderSubject.next(data);
+    });
+
+    this.socket.on('kitchen:order_updated', (data) => {
+      this.kitchenOrderUpdatedSubject.next(data);
+    });
   }
 
   onOrderCreated(): Observable<any> {
@@ -56,6 +67,14 @@ export class SocketService {
 
   onChatSessionUpdated(): Observable<any> {
     return this.chatSessionUpdatedSubject.asObservable();
+  }
+
+  onKitchenNewOrder(): Observable<any> {
+    return this.kitchenNewOrderSubject.asObservable();
+  }
+
+  onKitchenOrderUpdated(): Observable<any> {
+    return this.kitchenOrderUpdatedSubject.asObservable();
   }
 
   emit(event: string, data: any) {

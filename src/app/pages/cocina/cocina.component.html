@@ -1,0 +1,68 @@
+<!-- ─── KDS Header ─────────────────────────────────────────────────── -->
+<div class="kds-header">
+  <div class="kds-header-left">
+    <span class="kds-logo">🍳</span>
+    <div>
+      <h1 class="kds-title">Monitor de Cocina</h1>
+      <p class="kds-subtitle">Pedidos en tiempo real</p>
+    </div>
+  </div>
+  <div class="kds-header-right">
+    <div class="kds-counter" [class.kds-counter-empty]="pedidos.length === 0">
+      <span class="kds-counter-num">{{ pedidos.length }}</span>
+      <span class="kds-counter-label">{{ pedidos.length === 1 ? 'pedido' : 'pedidos' }}</span>
+    </div>
+    <button class="kds-refresh-btn" (click)="cargarPedidos()" title="Actualizar">↻</button>
+  </div>
+</div>
+
+<!-- ─── Loading ────────────────────────────────────────────────────── -->
+<div *ngIf="cargando" class="kds-loading">
+  <div class="kds-spinner"></div>
+  <p>Cargando pedidos...</p>
+</div>
+
+<!-- ─── Empty State ────────────────────────────────────────────────── -->
+<div *ngIf="!cargando && pedidos.length === 0" class="kds-empty">
+  <div class="kds-empty-icon">✅</div>
+  <h2>¡Todo al día!</h2>
+  <p>No hay pedidos en cocina en este momento.</p>
+</div>
+
+<!-- ─── Pedidos Grid ───────────────────────────────────────────────── -->
+<div *ngIf="!cargando && pedidos.length > 0" class="kds-grid">
+  <div
+    *ngFor="let order of pedidos"
+    class="kds-card"
+    [class.kds-urgent]="urgencyClass(order) === 'urgent'"
+    [class.kds-warning]="urgencyClass(order) === 'warning'"
+  >
+    <!-- Card Header -->
+    <div class="kds-card-header">
+      <span class="kds-order-label">{{ orderLabel(order) }}</span>
+      <div class="kds-timer" [class.kds-timer-warning]="urgencyClass(order) === 'warning'" [class.kds-timer-urgent]="urgencyClass(order) === 'urgent'">
+        ⏱ {{ formatElapsed(order) }}
+      </div>
+    </div>
+
+    <!-- Mesero / Cliente -->
+    <div class="kds-meta" *ngIf="order.waiterId">
+      <span class="kds-meta-label">Mesero:</span>
+      <span class="kds-meta-val">{{ order.waiterId?.name || order.waiterId }}</span>
+    </div>
+
+    <!-- Items list -->
+    <ul class="kds-items">
+      <li *ngFor="let item of itemsKitchen(order)" class="kds-item">
+        <span class="kds-item-qty">{{ item.quantity }}x</span>
+        <span class="kds-item-name">{{ item.productName }}</span>
+        <span *ngIf="item.notes" class="kds-item-note">📝 {{ item.notes }}</span>
+      </li>
+    </ul>
+
+    <!-- Listo Button -->
+    <button class="kds-listo-btn" (click)="marcarListo(order)">
+      ✓ LISTO
+    </button>
+  </div>
+</div>

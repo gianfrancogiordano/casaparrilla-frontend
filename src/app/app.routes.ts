@@ -30,8 +30,15 @@ export const routes: Routes = [
       { path: 'delivery', component: DeliveryComponent },
       { path: 'delivery/nuevo', loadComponent: () => import('./pages/delivery/nuevo/nuevo-delivery.component').then(m => m.NuevoDeliveryComponent) },
       { path: 'delivery/editar/:id', loadComponent: () => import('./pages/delivery/nuevo/nuevo-delivery.component').then(m => m.NuevoDeliveryComponent) },
-      { path: 'meseros', component: MeserosComponent },
-      { path: 'meseros/:numero', component: MesaDetalleComponent },
+      // ─── Mesas (replaces Meseros) ─────────────────────────────────────────
+      { path: 'mesas', component: MeserosComponent },
+      { path: 'mesas/:numero', component: MesaDetalleComponent },
+      // Redirect old /meseros links to /mesas
+      { path: 'meseros', redirectTo: 'mesas', pathMatch: 'full' },
+      { path: 'meseros/:numero', redirectTo: 'mesas/:numero', pathMatch: 'full' },
+      // ─── Kitchen Display System ───────────────────────────────────────────
+      { path: 'cocina', loadComponent: () => import('./pages/cocina/cocina.component').then(m => m.CocinaComponent) },
+      // ─── Other modules ────────────────────────────────────────────────────
       { path: 'inventario', component: InventarioComponent },
       { path: 'productos', component: ProductosComponent },
       { path: 'pedidos', component: PedidosComponent },
@@ -46,9 +53,7 @@ export const routes: Routes = [
       { path: 'configuracion', loadComponent: () => import('./pages/configuracion/configuracion.component').then(m => m.ConfiguracionComponent) },
       { path: 'inbox', loadComponent: () => import('./pages/inbox/inbox.component').then(m => m.InboxComponent) },
       { path: 'conocimiento', loadComponent: () => import('./pages/conocimiento/conocimiento.component').then(m => m.ConocimientoComponent) },
-
     ]
   },
   { path: '**', redirectTo: 'login', pathMatch: 'full' }
 ];
-

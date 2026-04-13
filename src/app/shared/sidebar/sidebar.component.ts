@@ -34,10 +34,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: ['Administrador', 'Mesero'],
     },
     {
-      label: 'Meseros',
-      icon: '🍽️',
-      route: '/meseros',
+      label: 'Mesas',
+      icon: '🪑',
+      route: '/mesas',
       roles: ['Administrador', 'Mesero'],
+    },
+    {
+      label: 'Monitor de Cocina',
+      icon: '🍳',
+      route: '/cocina',
+      roles: ['Administrador', 'Cocina'],
     },
     {
       label: 'Delivery',
@@ -167,7 +173,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /** Items de operación visibles */
   get operacionItems(): NavItem[] {
-    const operacion = ['Dashboard', 'Meseros', 'Delivery', 'Pedidos', 'Inbox WhatsApp'];
+    const operacion = ['Dashboard', 'Mesas', 'Monitor de Cocina', 'Delivery', 'Pedidos', 'Inbox WhatsApp'];
     return this.menuItems.filter((i) => operacion.includes(i.label));
   }
 
