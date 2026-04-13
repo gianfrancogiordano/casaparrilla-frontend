@@ -19,16 +19,25 @@
         class="session-item"
         *ngFor="let session of sessions"
         [class.active]="selectedSession?.phone === session.phone"
+        [class.vip-session]="session.isVip"
         (click)="selectSession(session)"
       >
-        <div class="avatar">{{ (session.clientName || 'C').charAt(0).toUpperCase() }}</div>
+        <div class="avatar" [class.vip-avatar]="session.isVip">
+          {{ session.isVip ? '🌟' : (session.clientName || 'C').charAt(0).toUpperCase() }}
+        </div>
         <div class="session-info">
           <div class="session-top">
-            <span class="session-name">{{ session.clientName || session.phone }}</span>
+            <span class="session-name">
+              {{ session.clientName || session.phone }}
+              <span class="vip-badge" *ngIf="session.isVip">VIP</span>
+            </span>
             <span class="session-time">{{ formatTime(session.lastMessageAt) }}</span>
           </div>
           <div class="session-bottom">
             <span class="session-preview">{{ session.lastMessagePreview || 'Sin mensajes' }}</span>
+            <span class="loyalty-pts" *ngIf="session.loyaltyPoints && session.loyaltyPoints > 0">
+              ⭐ {{ session.loyaltyPoints }} pts
+            </span>
             <span class="unread-dot" *ngIf="session.unreadCount > 0">{{ session.unreadCount }}</span>
           </div>
         </div>
@@ -54,10 +63,18 @@
       <button class="back-btn mobile-only" (click)="goBackToList()">
         ← Volver
       </button>
-      <div class="avatar">{{ (selectedSession.clientName || 'C').charAt(0).toUpperCase() }}</div>
+      <div class="avatar" [class.vip-avatar]="selectedSession.isVip">
+        {{ selectedSession.isVip ? '🌟' : (selectedSession.clientName || 'C').charAt(0).toUpperCase() }}
+      </div>
       <div class="chat-header-info">
-        <span class="chat-name">{{ selectedSession.clientName || selectedSession.phone }}</span>
+        <div class="chat-header-name-row">
+          <span class="chat-name">{{ selectedSession.clientName || selectedSession.phone }}</span>
+          <span class="vip-badge" *ngIf="selectedSession.isVip">🌟 VIP</span>
+        </div>
         <span class="chat-phone">{{ selectedSession.phone }}</span>
+        <span class="loyalty-pts-header" *ngIf="selectedSession.loyaltyPoints !== undefined">
+          ⭐ {{ selectedSession.loyaltyPoints }} puntos de fidelidad
+        </span>
       </div>
       <div class="ai-toggle" (click)="toggleAI(selectedSession)">
         <span class="ai-label" [class.active]="selectedSession.isAiActive">

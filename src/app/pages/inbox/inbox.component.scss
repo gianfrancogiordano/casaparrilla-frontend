@@ -420,6 +420,51 @@
   small { font-size: 0.8rem; color: #9e9e9e; }
 }
 
+/* ─── VIP & Loyalty Styles ─────────────────────── */
+.vip-session {
+  background: linear-gradient(to right, #fffde7, #fff);
+}
+
+.vip-avatar {
+  background: linear-gradient(135deg, #f9a825, #fbc02d) !important;
+  box-shadow: 0 0 0 2px #fbc02d55;
+  font-size: 1.1rem !important;
+}
+
+.vip-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #f9a825, #ff6f00);
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  margin-left: 5px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.loyalty-pts {
+  font-size: 0.68rem;
+  color: #f9a825;
+  font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.chat-header-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.loyalty-pts-header {
+  font-size: 0.7rem;
+  color: #f9a825;
+  font-weight: 600;
+}
+
 /* ═══════════════════════════════════════════════
    RESPONSIVE — Mobile First
 ════════════════════════════════════════════════ */

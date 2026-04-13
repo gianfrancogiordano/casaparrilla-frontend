@@ -4,7 +4,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { ChatService, ChatSession, ChatMessage } from '../../services/chat.service';
 import { SocketService } from '../../services/socket.service';
 
@@ -91,7 +92,31 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   loadSessions() {
-    this.chatService.getSessions().subscribe(sessions => {
+    this.chatService.getSessions().pipe(
+      switchMap(sessions => {
+        if (!sessions.length) return of([]);
+        // Enrich each session with client loyalty data in parallel
+        const enriched$ = sessions.map(s =>
+          this.chatService.getClientInfo(s.phone, s.clientName || 'Cliente').pipe(
+            catchError(() => of(null))
+          )
+        );
+        return forkJoin(enriched$).pipe(
+          catchError(() => of(sessions.map(() => null))),
+          switchMap(clientInfos => {
+            sessions.forEach((s, i) => {
+              const info = clientInfos[i];
+              if (info) {
+                s.clientName = info.name || s.clientName;
+                s.loyaltyPoints = info.loyaltyPoints ?? 0;
+                s.isVip = (info.loyaltyPoints ?? 0) >= 100;
+              }
+            });
+            return of(sessions);
+          })
+        );
+      })
+    ).subscribe(sessions => {
       this.sessions = sessions;
       this.cdr.detectChanges();
     });

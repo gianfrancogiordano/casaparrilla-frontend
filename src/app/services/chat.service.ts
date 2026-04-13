@@ -11,6 +11,9 @@ export interface ChatSession {
   unreadCount: number;
   lastMessagePreview: string;
   lastMessageAt: string;
+  // enriched client data
+  loyaltyPoints?: number;
+  isVip?: boolean;
 }
 
 export interface ChatMessage {
@@ -46,5 +49,10 @@ export class ChatService {
 
   markRead(phone: string): Observable<any> {
     return this.http.patch(`${this.base}/sessions/${phone}/read`, {});
+  }
+
+  getClientInfo(phone: string, name: string = 'Cliente'): Observable<{ clientId: string; name: string; loyaltyPoints: number; isVip: boolean }> {
+    const publicBase = environment.apiUrl;
+    return this.http.post<any>(`${publicBase}/public/clients/identify`, { phone, name });
   }
 }
