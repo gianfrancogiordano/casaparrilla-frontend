@@ -253,12 +253,13 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   }
 
   getNextStatus(currentStatus: string): string | null {
+    // Flujo: Recibido → En Cocina → Lista → Entregado
+    // (Sin "En Camino" — el domi es externo, no se rastrea)
     const flow: Record<string, string> = {
       'Recibido':  'En Cocina',
       'Abierta':   'En Cocina',
       'En Cocina': 'Lista',
-      'Lista':     'En Camino',
-      'En Camino': 'Entregado',   // Entregado saca del dashboard
+      'Lista':     'Entregado',
     };
     return flow[currentStatus] || null;
   }
