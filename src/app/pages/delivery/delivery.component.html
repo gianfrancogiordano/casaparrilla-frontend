@@ -44,8 +44,8 @@
           <span class="order-status badge" [attr.data-status]="order.status">
             {{ order.status }}
           </span>
-          <span class="paid-badge" *ngIf="order.paymentInfo?.status === 'Pagado'">
-            ✅ {{ order.paymentInfo?.method || 'Pagado' }}
+          <span class="paid-badge" *ngIf="order.paymentInfo.status === 'Pagado'">
+            ✅ {{ order.paymentInfo.method || 'Pagado' }}
           </span>
         </div>
       </div>
@@ -98,9 +98,9 @@
         <!-- Botón de cobro INDEPENDIENTE del flujo -->
         <button class="btn-pay"
           (click)="abrirModalCobro(order)"
-          [class.btn-pay-done]="order.paymentInfo?.status === 'Pagado'"
-          title="{{ order.paymentInfo?.status === 'Pagado' ? 'Ver/cambiar pago' : 'Cobrar pedido' }}">
-          {{ order.paymentInfo?.status === 'Pagado' ? '✅' : '💳' }}
+          [class.btn-pay-done]="order.paymentInfo.status === 'Pagado'"
+          title="{{ order.paymentInfo.status === 'Pagado' ? 'Ver/cambiar pago' : 'Cobrar pedido' }}">
+          {{ order.paymentInfo.status === 'Pagado' ? '✅' : '💳' }}
         </button>
         <button class="btn-action flex-grow-1"
           *ngIf="getNextStatus(order.status) as next"
