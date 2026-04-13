@@ -49,6 +49,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   estadoBadge(status: string): string {
     const map: Record<string, string> = {
       'Pagado':    'badge-pagado',
+      'Entregado': 'badge-pagado',
       'Abierta':   'badge-pendiente',
       'En Cocina': 'badge-preparacion',
       'Lista':     'badge-entregado',

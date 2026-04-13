@@ -53,9 +53,9 @@ export class DashboardService {
     });
 
     // Métricas
-    const pagadasHoy   = ordersHoy.filter((o) => o.status === 'Pagado');
+    const pagadasHoy   = ordersHoy.filter((o) => o.status === 'Pagado' || o.status === 'Entregado');
     const ventasHoy    = pagadasHoy.reduce((sum, o) => sum + (o.totals?.total ?? 0), 0);
-    const activas      = orders.filter((o) => !['Pagado', 'Cancelado', 'Cerrado'].includes(o.status));
+    const activas      = orders.filter((o) => !['Pagado', 'Entregado', 'Cancelado', 'Cerrado'].includes(o.status));
     const enCocina     = orders.filter((o) => o.status === 'En Cocina');
     const ticketProm   = pagadasHoy.length > 0 ? ventasHoy / pagadasHoy.length : 0;
 
@@ -67,7 +67,7 @@ export class DashboardService {
     // Top productos: conteo de ventas por nombre de producto
     const productMap: Record<string, number> = {};
     orders
-      .filter((o) => o.status === 'Pagado')
+      .filter((o) => o.status === 'Pagado' || o.status === 'Entregado')
       .forEach((o) => {
         o.items?.forEach((item) => {
           productMap[item.productName] = (productMap[item.productName] ?? 0) + item.quantity;
