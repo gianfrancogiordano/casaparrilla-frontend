@@ -261,13 +261,13 @@ export class DeliveryComponent implements OnInit, OnDestroy {
   }
 
   getNextStatus(currentStatus: string): string | null {
-    // Flujo: Recibido → En Cocina → Lista → Entregado
-    // (Sin "En Camino" — el domi es externo, no se rastrea)
+    // Flujo: Recibido → En Cocina → Listo/Lista → Entregado
     const flow: Record<string, string> = {
       'Recibido':  'En Cocina',
       'Abierta':   'En Cocina',
-      'En Cocina': 'Lista',
-      'Lista':     'Entregado',
+      'En Cocina': 'Listo',
+      'Lista':     'Entregado',  // legacy
+      'Listo':     'Entregado',  // current (set by KDS)
     };
     return flow[currentStatus] || null;
   }
