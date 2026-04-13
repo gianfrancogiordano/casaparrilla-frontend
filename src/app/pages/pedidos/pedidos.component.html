@@ -79,6 +79,7 @@
           <option value="En Cocina">En Cocina</option>
           <option value="Lista">Lista</option>
           <option value="En Camino">En Camino</option>
+          <option value="Entregado">Entregado</option>
           <option value="Pagado">Pagado</option>
           <option value="Cancelado">Cancelado</option>
         </select>
@@ -145,7 +146,7 @@
           </span>
         </div>
       </div>
-      <div class="text-end mt-2" *ngIf="order.status !== 'Pagado' && order.status !== 'Cancelado'">
+      <div class="text-end mt-2" *ngIf="order.status !== 'Pagado' && order.status !== 'Entregado' && order.status !== 'Cancelado'">
         <button class="btn btn-outline-danger btn-sm rounded-pill px-3"
                 (click)="cancelarOrden(order); $event.stopPropagation()">
           Cancelar
@@ -201,7 +202,7 @@
                 <span class="status-badge" [ngClass]="getStatusClass(order.status)">{{ order.status }}</span>
               </td>
               <td class="pe-4 text-end" (click)="$event.stopPropagation()">
-                <button *ngIf="order.status !== 'Pagado' && order.status !== 'Cancelado'"
+                <button *ngIf="order.status !== 'Pagado' && order.status !== 'Entregado' && order.status !== 'Cancelado'"
                         class="btn btn-sm btn-outline-danger rounded-pill px-3"
                         (click)="cancelarOrden(order)">
                   Cancelar

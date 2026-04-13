@@ -158,15 +158,15 @@ export class PedidosComponent implements OnInit {
     this.stats = {
       total: ordenes.length,
       activas: ordenes.filter(o => estadosActivos.includes(o.status)).length,
-      pagadas: ordenes.filter(o => o.status === 'Pagado').length,
+      pagadas: ordenes.filter(o => o.status === 'Pagado' || o.status === 'Entregado').length,
       ingresos: ordenes
-        .filter(o => o.status === 'Pagado')
+        .filter(o => o.status === 'Pagado' || o.status === 'Entregado')
         .reduce((sum, o) => sum + (o.totals?.total ?? 0), 0),
     };
   }
 
   calcularResumenPago(ordenes: Order[]): void {
-    const pagadas = ordenes.filter(o => o.status === 'Pagado' && o.paymentInfo?.method);
+    const pagadas = ordenes.filter(o => (o.status === 'Pagado' || o.status === 'Entregado') && o.paymentInfo?.method);
     const mapa: Record<string, number> = {};
 
     for (const o of pagadas) {
@@ -223,6 +223,7 @@ export class PedidosComponent implements OnInit {
       'En Cocina':  's-cocina',
       'Lista':      's-lista',
       'En Camino':  's-camino',
+      'Entregado':  's-pagado',
       'Pagado':     's-pagado',
       'Cancelado':  's-cancelado',
     };
@@ -236,6 +237,7 @@ export class PedidosComponent implements OnInit {
       'En Cocina':  'h-cocina',
       'Lista':      'h-lista',
       'En Camino':  'h-camino',
+      'Entregado':  'h-pagado',
       'Pagado':     'h-pagado',
       'Cancelado':  'h-cancelado',
     };
