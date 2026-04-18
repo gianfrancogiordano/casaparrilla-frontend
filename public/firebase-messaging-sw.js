@@ -21,6 +21,7 @@ messaging.onBackgroundMessage((payload) => {
     body,
     icon:  '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
+    image: '/icons/icon-512x512.png',
     data:  payload.data ?? {},
     requireInteraction: true,
   });

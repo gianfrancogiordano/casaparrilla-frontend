@@ -125,9 +125,17 @@ export class NotificationToastComponent implements OnInit, OnDestroy {
     this.socketSub = this.socketService.onOrderCreated().subscribe((order: any) => {
       if (order.orderType === 'Delivery') {
         const clientName = order.clientId?.name || order.customerPhone || 'Cliente';
+        const totalOrder = order.totals?.total || 0;
+        const formattedTotal = new Intl.NumberFormat('en-US', { 
+          style: 'currency', 
+          currency: 'USD', 
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(totalOrder);
+        
         const n: PushNotification = {
           title: '🛵 Nuevo Delivery Recibido',
-          body: `${clientName} — ${order.deliveryAddress || 'Sin dirección'}`,
+          body: `${clientName} — Monto: ${formattedTotal}`,
           timestamp: new Date()
         };
         // Mostrar visualmente
