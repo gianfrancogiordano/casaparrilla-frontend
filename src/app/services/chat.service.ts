@@ -74,4 +74,12 @@ export class ChatService {
       retry(RETRY_CONFIG),
     );
   }
+
+  /**
+   * Builds the authenticated proxy URL for Meta CDN media.
+   * Use this instead of the raw Meta URL in <img src> and <audio src>.
+   */
+  getProxyUrl(metaUrl: string): string {
+    return `${environment.apiUrl}/chat/media-proxy?url=${encodeURIComponent(metaUrl)}`;
+  }
 }

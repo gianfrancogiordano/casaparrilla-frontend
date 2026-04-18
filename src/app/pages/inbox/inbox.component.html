@@ -150,7 +150,7 @@
             <svg class="audio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
               <path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/>
             </svg>
-            <audio controls [src]="msg.mediaUrl" preload="none" style="flex:1;min-width:0">
+            <audio controls [src]="getProxyUrl(msg.mediaUrl)" preload="none" style="flex:1;min-width:0">
               Tu navegador no soporta audio.
             </audio>
           </div>
@@ -163,7 +163,7 @@
         <div class="bubble-image" *ngIf="msg.type === 'image'">
           <img
             *ngIf="msg.mediaUrl"
-            [src]="msg.mediaUrl"
+            [src]="getProxyUrl(msg.mediaUrl)"
             class="msg-thumbnail"
             (click)="openImageModal(msg.mediaUrl!)"
             alt="Imagen del cliente"
@@ -171,7 +171,7 @@
           />
           <div class="image-actions" *ngIf="msg.mediaUrl">
             <button class="img-action-btn" (click)="openImageModal(msg.mediaUrl!)">🔍 Ver</button>
-            <a class="img-action-btn" [href]="msg.mediaUrl" target="_blank" download>⬇️ Descargar</a>
+            <a class="img-action-btn" [href]="getProxyUrl(msg.mediaUrl)" target="_blank" download>⬇️ Descargar</a>
           </div>
           <div class="bubble-content" *ngIf="msg.content && msg.content !== '📎 Imagen'">{{ msg.content }}</div>
         </div>

@@ -212,8 +212,13 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
     return `https://www.google.com/maps?q=${msg.lat},${msg.lng}`;
   }
 
+  /** Proxy URL adds the Meta Bearer token — browsers can't do this natively */
+  getProxyUrl(metaUrl: string): string {
+    return this.chatService.getProxyUrl(metaUrl);
+  }
+
   openImageModal(url: string): void {
-    this.activeImage = url;
+    this.activeImage = this.chatService.getProxyUrl(url);
   }
 
   closeImageModal(): void {
