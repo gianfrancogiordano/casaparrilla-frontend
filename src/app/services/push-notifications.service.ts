@@ -4,6 +4,7 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { environment } from '../../environments/environment';
 import { BehaviorSubject } from 'rxjs';
+import { AuthService } from './auth.service';
 
 export interface PushNotification {
   title: string;
@@ -22,7 +23,7 @@ export class PushNotificationsService implements OnDestroy {
   private notificationSubject = new BehaviorSubject<PushNotification | null>(null);
   notification$ = this.notificationSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   /**
    * Inicializa Firebase, registra el SW, pide permiso y suscribe al topic admin-deliveries.
@@ -67,8 +68,8 @@ export class PushNotificationsService implements OnDestroy {
       // Guardar token localmente
       localStorage.setItem('admin_fcm_token', token);
 
-      // Suscribir al topic 'admin-deliveries' en el backend
-      await this.subscribeToAdminTopic(token);
+      // Registrar token + identidad de usuario en el backend
+      await this.registerToken(token);
 
       // Escuchar mensajes en foreground
       this.listenForeground();
@@ -80,13 +81,19 @@ export class PushNotificationsService implements OnDestroy {
   }
 
   /**
-   * Suscribe el token FCM al topic 'admin-deliveries' vía el backend
+   * Registra el token FCM con la identidad del usuario en el backend (MongoDB)
    */
-  private async subscribeToAdminTopic(token: string): Promise<void> {
+  private async registerToken(token: string): Promise<void> {
     try {
-      await this.http.post(`${environment.apiUrl.replace('/api', '')}/notifications/subscribe`, { token }).toPromise();
+      const user = this.authService.getCurrentUser();
+      await this.http.post(`${environment.apiUrl.replace('/api', '')}/notifications/subscribe`, {
+        token,
+        userId: user?.id ?? 'unknown',
+        userName: user?.name ?? 'unknown',
+        role: user?.role ?? 'unknown',
+      }).toPromise();
     } catch (err) {
-      console.error('[Push] Error al suscribir al topic:', err);
+      console.error('[Push] Error al registrar token:', err);
     }
   }
 
