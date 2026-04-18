@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { PushNotificationsService, PushNotification } from '../../services/push-notifications.service';
+import { SocketService } from '../../services/socket.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -103,23 +104,53 @@ import { Router } from '@angular/router';
 export class NotificationToastComponent implements OnInit, OnDestroy {
   visible: Array<PushNotification & { id: number; entering: boolean }> = [];
   private counter = 0;
-  private sub: Subscription | null = null;
+  private pushSub: Subscription | null = null;
+  private socketSub: Subscription | null = null;
   private readonly AUTO_DISMISS_MS = 6000;
 
   constructor(
     private pushService: PushNotificationsService,
+    private socketService: SocketService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.sub = this.pushService.notification$.subscribe(n => {
+    // 1. Escuchar notificaciones Push (FCM)
+    this.pushSub = this.pushService.notification$.subscribe(n => {
       if (!n) return;
       this.show(n);
+    });
+
+    // 2. Escuchar WebSockets (garantiza recibirlo aunque FCM falle/esté bloqueado)
+    this.socketSub = this.socketService.onOrderCreated().subscribe((order: any) => {
+      if (order.orderType === 'Delivery') {
+        const clientName = order.clientId?.name || order.customerPhone || 'Cliente';
+        const n: PushNotification = {
+          title: '🛵 Nuevo Delivery Recibido',
+          body: `${clientName} — ${order.deliveryAddress || 'Sin dirección'}`,
+          timestamp: new Date()
+        };
+        // Mostrar visualmente
+        this.show(n);
+        // Alertar por voz
+        this.playAudioNotification();
+      }
     });
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
+    this.pushSub?.unsubscribe();
+    this.socketSub?.unsubscribe();
+  }
+
+  private playAudioNotification() {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance('Atención, ha llegado un nuevo pedido de delivery');
+      utterance.lang = 'es-ES';
+      utterance.rate = 1.0;
+      utterance.volume = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
   }
 
   private show(n: PushNotification): void {

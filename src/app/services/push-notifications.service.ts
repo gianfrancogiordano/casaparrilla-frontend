@@ -35,6 +35,13 @@ export class PushNotificationsService implements OnDestroy {
     }
 
     try {
+      // Pedir permiso de notificaciones PRIMERO para asociarlo al clic del usuario
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.warn('[Push] Permiso de notificaciones denegado.');
+        return;
+      }
+
       // Inicializar Firebase App (evitar duplicados)
       this.app = getApps().length
         ? getApps()[0]
@@ -45,13 +52,6 @@ export class PushNotificationsService implements OnDestroy {
       // Registrar el SW de Firebase manualmente
       const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       await navigator.serviceWorker.ready;
-
-      // Pedir permiso de notificaciones
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        console.warn('[Push] Permiso de notificaciones denegado.');
-        return;
-      }
 
       // Obtener token FCM
       const token = await getToken(this.messaging, {

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { PushNotificationsService } from '../../services/push-notifications.service';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router,
     private pushService: PushNotificationsService,
+    private alertService: AlertService,
   ) {
     this.loginForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -39,12 +41,23 @@ export class LoginComponent {
     this.authService.login(name, password).subscribe({
       next: () => {
         this.isLoading = false;
-        // Pedir permiso de notificaciones AQUÍ — el click del botón login
-        // es el gesto de usuario que los navegadores requieren
+        
+        // Si es Admin o Mesero, mostramos un diálogo explícito para que el click del usuario 
+        // habilite el contexto necesario para pedir el permiso de notificaciones PUSH WEB.
         if (this.authService.isAdmin() || this.authService.isMesero()) {
-          this.pushService.initAndRequestPermission();
+          this.alertService.confirm(
+            'Notificaciones Web',
+            'Para que tu dispositivo te alerte inmediatamente de los nuevos pedidos, necesitamos que apruebes las notificaciones PUSH web a continuación.',
+            'Activar Notificaciones'
+          ).then((accepted) => {
+            if (accepted) {
+              this.pushService.initAndRequestPermission();
+            }
+            this.router.navigate(['/']);
+          });
+        } else {
+          this.router.navigate(['/']);
         }
-        this.router.navigate(['/']);
       },
       error: (err) => {
         this.isLoading = false;
