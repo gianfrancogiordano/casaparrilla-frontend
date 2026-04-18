@@ -140,7 +140,54 @@
         <div class="bubble-sender" *ngIf="msg.role !== 'user'">
           {{ msg.role === 'ai' ? '🤖 Valentina' : '👤 Tú' }}
         </div>
-        <div class="bubble-content">{{ msg.content }}</div>
+
+        <!-- TEXT -->
+        <div class="bubble-content" *ngIf="!msg.type || msg.type === 'text'">{{ msg.content }}</div>
+
+        <!-- AUDIO: native player + transcript -->
+        <div class="bubble-audio" *ngIf="msg.type === 'audio'">
+          <div class="audio-player-wrap" *ngIf="msg.mediaUrl">
+            <svg class="audio-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path d="M12 3v10.55A4 4 0 1014 17V7h4V3h-6z"/>
+            </svg>
+            <audio controls [src]="msg.mediaUrl" preload="none" style="flex:1;min-width:0">
+              Tu navegador no soporta audio.
+            </audio>
+          </div>
+          <div class="audio-transcript" *ngIf="msg.content && !msg.content.includes('🎤 Nota de voz') || !msg.mediaUrl">
+            {{ msg.content }}
+          </div>
+        </div>
+
+        <!-- IMAGE: thumbnail + lightbox + download -->
+        <div class="bubble-image" *ngIf="msg.type === 'image'">
+          <img
+            *ngIf="msg.mediaUrl"
+            [src]="msg.mediaUrl"
+            class="msg-thumbnail"
+            (click)="openImageModal(msg.mediaUrl!)"
+            alt="Imagen del cliente"
+            loading="lazy"
+          />
+          <div class="image-actions" *ngIf="msg.mediaUrl">
+            <button class="img-action-btn" (click)="openImageModal(msg.mediaUrl!)">🔍 Ver</button>
+            <a class="img-action-btn" [href]="msg.mediaUrl" target="_blank" download>⬇️ Descargar</a>
+          </div>
+          <div class="bubble-content" *ngIf="msg.content && msg.content !== '📎 Imagen'">{{ msg.content }}</div>
+        </div>
+
+        <!-- LOCATION: Google Maps link -->
+        <div class="bubble-location" *ngIf="msg.type === 'location'">
+          <a [href]="getMapsUrl(msg)" target="_blank" rel="noopener" class="location-link">
+            <span class="location-pin">📍</span>
+            <span>Ver ubicación en Google Maps</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+          <div class="location-coords" *ngIf="msg.lat && msg.lng">{{ msg.lat }}, {{ msg.lng }}</div>
+        </div>
+
         <div class="bubble-time">{{ formatMessageTime(msg.createdAt) }}</div>
       </div>
     </div>
@@ -171,4 +218,15 @@
     </div>
 
   </main>
+</div>
+
+<!-- ── Image Lightbox ─────────────────────────────────────────────────────── -->
+<div class="image-lightbox" *ngIf="activeImage" (click)="closeImageModal()">
+  <div class="lightbox-inner" (click)="$event.stopPropagation()">
+    <button class="lightbox-close" (click)="closeImageModal()">✕</button>
+    <img [src]="activeImage" alt="Vista previa" />
+    <div class="lightbox-actions">
+      <a [href]="activeImage" target="_blank" download class="lightbox-download-btn">⬇️ Descargar imagen</a>
+    </div>
+  </div>
 </div>

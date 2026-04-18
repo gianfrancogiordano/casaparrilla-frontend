@@ -25,6 +25,7 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
   newMessage = '';
   loading = false;
   sendingMessage = false;
+  activeImage: string | null = null;  // lightbox
   /** Mobile: 'list' shows sessions, 'chat' shows messages */
   mobileView: 'list' | 'chat' = 'list';
 
@@ -50,7 +51,10 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
             sessionPhone: data.phone,
             role: data.role,
             content: data.content,
-            type: 'text',
+            type: data.type ?? 'text',
+            mediaUrl: data.mediaUrl ?? null,
+            lat: data.lat ?? null,
+            lng: data.lng ?? null,
             createdAt: data.timestamp ?? new Date().toISOString(),
           });
           this.shouldScrollToBottom = true;
@@ -201,5 +205,18 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   formatMessageTime(dateStr: string): string {
     return new Date(dateStr).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ─── Media helpers ──────────────────────────────────────────────────────────
+  getMapsUrl(msg: ChatMessage): string {
+    return `https://www.google.com/maps?q=${msg.lat},${msg.lng}`;
+  }
+
+  openImageModal(url: string): void {
+    this.activeImage = url;
+  }
+
+  closeImageModal(): void {
+    this.activeImage = null;
   }
 }

@@ -22,7 +22,10 @@ export interface ChatMessage {
   sessionPhone: string;
   role: 'user' | 'ai' | 'human';
   content: string;
-  type: 'text' | 'audio' | 'image';
+  type: 'text' | 'audio' | 'image' | 'location';
+  mediaUrl?: string | null;
+  lat?: number | null;
+  lng?: number | null;
   createdAt: string;
 }
 
