@@ -18,6 +18,7 @@ export interface Product {
   category?: string;
   imageUrl?: string;
   available: boolean;
+  availableForDelivery?: boolean;
   requiresKitchen?: boolean;
   recipe: RecipeItem[];
 }

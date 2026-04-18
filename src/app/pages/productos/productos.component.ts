@@ -164,6 +164,7 @@ export class ProductosComponent implements OnInit {
       category: '',
       imageUrl: '',
       available: true,
+      availableForDelivery: true,
       requiresKitchen: true,
       recipe: []
     };

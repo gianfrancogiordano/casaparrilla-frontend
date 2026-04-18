@@ -31,6 +31,7 @@
             <th class="py-3">Precio</th>
             <th class="py-3 text-center">Cocina</th>
             <th class="py-3 text-center">Disponible</th>
+            <th class="py-3 text-center">Delivery</th>
             <th class="py-3 text-center">Receta</th>
             <th class="pe-4 py-3 text-end">Acciones</th>
           </tr>
@@ -58,6 +59,11 @@
               <div class="form-check form-switch d-flex justify-content-center">
                 <input class="form-check-input" type="checkbox" [checked]="prod.available" (change)="toggleAvailability(prod)">
               </div>
+            </td>
+            <td class="text-center">
+              <span class="fs-5" [title]="prod.availableForDelivery !== false ? 'Disponible para delivery' : 'Solo en restaurante'">
+                {{ prod.availableForDelivery !== false ? '🛵' : '🏠' }}
+              </span>
             </td>
             <td class="text-center">
               <span class="badge rounded-pill" [ngClass]="prod.recipe.length > 0 ? 'bg-info-soft text-info' : 'bg-light text-muted'">
@@ -114,7 +120,7 @@
                 <label class="form-label small fw-bold">Imagen URL</label>
                 <input type="text" class="form-control" [(ngModel)]="form.imageUrl" name="imageUrl">
               </div>
-              <div class="d-flex gap-3 mb-3">
+              <div class="d-flex flex-wrap gap-3 mb-3">
                 <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="checkKitchen" [(ngModel)]="form.requiresKitchen" name="kitchen">
                   <label class="form-check-label small" for="checkKitchen">Va a cocina</label>
@@ -122,6 +128,10 @@
                 <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" id="checkAvailable" [(ngModel)]="form.available" name="available">
                   <label class="form-check-label small" for="checkAvailable">Disponible</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="checkDelivery" [(ngModel)]="form.availableForDelivery" name="delivery">
+                  <label class="form-check-label small" for="checkDelivery">🛵 Delivery</label>
                 </div>
               </div>
             </form>
