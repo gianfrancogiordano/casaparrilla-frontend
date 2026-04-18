@@ -86,7 +86,7 @@ export class PushNotificationsService implements OnDestroy {
   private async registerToken(token: string): Promise<void> {
     try {
       const user = this.authService.getCurrentUser();
-      await this.http.post(`${environment.apiUrl.replace('/api', '')}/notifications/subscribe`, {
+      await this.http.post(`${environment.apiUrl}/notifications/subscribe`, {
         token,
         userId: user?.id ?? 'unknown',
         userName: user?.name ?? 'unknown',
@@ -120,7 +120,7 @@ export class PushNotificationsService implements OnDestroy {
     const token = localStorage.getItem('admin_fcm_token');
     if (token) {
       try {
-        await this.http.delete(`${environment.apiUrl.replace('/api', '')}/notifications/unsubscribe`, { body: { token } }).toPromise();
+        await this.http.delete(`${environment.apiUrl}/notifications/unsubscribe`, { body: { token } }).toPromise();
       } catch (_) {}
       localStorage.removeItem('admin_fcm_token');
     }
