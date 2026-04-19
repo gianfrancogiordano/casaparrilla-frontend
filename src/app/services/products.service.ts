@@ -15,6 +15,8 @@ export interface Product {
   name: string;
   description?: string;
   sellPrice: number;
+  priceBs: number;
+  priceCop: number;
   category?: string;
   imageUrl?: string;
   available: boolean;
@@ -48,7 +50,12 @@ export class ProductsService {
     return this.http.delete<Product>(`${this.API}/${id}`);
   }
 
+  recalculatePrices(): Observable<{ updated: number; tasaBs: number; tasaCop: number }> {
+    return this.http.post<{ updated: number; tasaBs: number; tasaCop: number }>(`${this.API}/recalculate-prices`, {});
+  }
+
   getCategories(): string[] {
     return ['Parrillas', 'Entradas', 'Acompañantes', 'Bebidas', 'Postres', 'Licores'];
   }
 }
+

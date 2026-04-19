@@ -45,6 +45,10 @@ export class ConfiguracionComponent implements OnInit {
     pagoEfectivo: '',
     pagoPagoMovil: '',
     pagoZelle: '',
+    costoDelivery: 0,
+    costoDeliveryBs: 0,
+    costoDeliveryCop: 0,
+    agentEnabled: true,
     horario: this.horarioDefault(),
   };
 
@@ -82,6 +86,10 @@ export class ConfiguracionComponent implements OnInit {
           pagoEfectivo: config.pagoEfectivo || '',
           pagoPagoMovil: config.pagoPagoMovil || '',
           pagoZelle: config.pagoZelle || '',
+          costoDelivery: config.costoDelivery || 0,
+          costoDeliveryBs: config.costoDeliveryBs || 0,
+          costoDeliveryCop: config.costoDeliveryCop || 0,
+          agentEnabled: config.agentEnabled ?? true,
           horario: config.horario?.length === 7
             ? config.horario.map((d: any) => ({ activo: d.activo, apertura: d.apertura, cierre: d.cierre }))
             : this.horarioDefault(),

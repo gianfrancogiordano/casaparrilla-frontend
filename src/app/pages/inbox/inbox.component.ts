@@ -8,6 +8,8 @@ import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { ChatService, ChatSession, ChatMessage } from '../../services/chat.service';
 import { SocketService } from '../../services/socket.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-inbox',
@@ -26,6 +28,8 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
   loading = false;
   sendingMessage = false;
   activeImage: string | null = null;  // lightbox
+  agentEnabled = true;  // Global agent toggle
+  togglingAgent = false;
   /** Mobile: 'list' shows sessions, 'chat' shows messages */
   mobileView: 'list' | 'chat' = 'list';
 
@@ -36,10 +40,12 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
     private chatService: ChatService,
     private socketService: SocketService,
     private cdr: ChangeDetectorRef,
+    private http: HttpClient,
   ) {}
 
   ngOnInit() {
     this.loadSessions();
+    this.loadAgentStatus();
 
     // Real-time: new message
     this.subs.add(
@@ -189,6 +195,29 @@ export class InboxComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   get totalUnread(): number {
     return this.sessions.reduce((acc, s) => acc + (s.unreadCount || 0), 0);
+  }
+
+  loadAgentStatus(): void {
+    this.http.get<{ enabled: boolean }>(`${environment.apiUrl}/agent/status`).subscribe({
+      next: (res) => {
+        this.agentEnabled = res.enabled;
+        this.cdr.detectChanges();
+      },
+      error: () => this.agentEnabled = true
+    });
+  }
+
+  toggleGlobalAgent(): void {
+    this.togglingAgent = true;
+    const newState = !this.agentEnabled;
+    this.http.patch<{ enabled: boolean }>(`${environment.apiUrl}/agent/status`, { enabled: newState }).subscribe({
+      next: (res) => {
+        this.agentEnabled = res.enabled;
+        this.togglingAgent = false;
+        this.cdr.detectChanges();
+      },
+      error: () => this.togglingAgent = false
+    });
   }
 
   formatTime(dateStr: string): string {

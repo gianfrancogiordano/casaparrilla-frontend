@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductsService, Product, RecipeItem } from '../../services/products.service';
 import { IngredientsService, Ingredient } from '../../services/ingredients.service';
@@ -8,7 +8,7 @@ import { AlertService } from '../../services/alert.service';
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './productos.component.html',
   styleUrl: './productos.component.scss'
 })
@@ -18,6 +18,7 @@ export class ProductosComponent implements OnInit {
   ingredientesDisponibles: Ingredient[] = [];
   categorias: string[] = [];
   searchText: string = '';
+  recalculando = false;
 
   // Modal / Form
   mostrarModal = false;
@@ -156,11 +157,43 @@ export class ProductosComponent implements OnInit {
     }
   }
 
+  async recalcularPrecios(): Promise<void> {
+    const confirmar = await this.alertService.confirm(
+      'Recalcular Precios',
+      '¿Estás seguro? Esto actualizará los precios en Bs y COP de TODOS los productos usando las tasas de cambio actuales de Configuración.',
+      'Sí, recalcular'
+    );
+    if (!confirmar) return;
+
+    this.recalculando = true;
+    this.productsService.recalculatePrices().subscribe({
+      next: (res) => {
+        this.recalculando = false;
+        this.alertService.success(`✅ ${res.updated} productos actualizados (Tasa Bs: ${res.tasaBs} | Tasa COP: ${res.tasaCop})`);
+        this.cargarProductos();
+      },
+      error: () => {
+        this.recalculando = false;
+        this.alertService.error('Error al recalcular precios');
+      }
+    });
+  }
+
+  formatBs(val: number): string {
+    return val ? `Bs. ${val.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : 'Bs. 0';
+  }
+
+  formatCop(val: number): string {
+    return val ? `COP $${val.toLocaleString('es-CO', { maximumFractionDigits: 0 })}` : 'COP $0';
+  }
+
   private getEmptyForm(): Partial<Product> {
     return {
       name: '',
       description: '',
       sellPrice: 0,
+      priceBs: 0,
+      priceCop: 0,
       category: '',
       imageUrl: '',
       available: true,
@@ -170,3 +203,4 @@ export class ProductosComponent implements OnInit {
     };
   }
 }
+

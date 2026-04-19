@@ -14,6 +14,12 @@
                      placeholder="Buscar producto..." 
                      [(ngModel)]="searchText" (input)="filtrarProductos()">
             </div>
+            <button class="btn btn-outline-primary rounded-pill px-3 d-flex align-items-center"
+                    (click)="recalcularPrecios()" [disabled]="recalculando">
+              <span *ngIf="!recalculando">💱 Recalcular Precios</span>
+              <span *ngIf="recalculando" class="spinner-border spinner-border-sm me-2"></span>
+              <span *ngIf="recalculando">Recalculando...</span>
+            </button>
             <button class="btn btn-dark rounded-pill px-4 d-flex align-items-center" (click)="abrirModal()">
               <span class="fs-5 me-2">+</span> Nuevo Producto
             </button>
@@ -28,7 +34,9 @@
           <tr>
             <th class="ps-4 py-3">Producto</th>
             <th class="py-3">Categoría</th>
-            <th class="py-3">Precio</th>
+            <th class="py-3">💵 USD</th>
+            <th class="py-3">🇻🇪 Bs</th>
+            <th class="py-3">🇨🇴 COP</th>
             <th class="py-3 text-center">Cocina</th>
             <th class="py-3 text-center">Disponible</th>
             <th class="py-3 text-center">Delivery</th>
@@ -49,7 +57,9 @@
               </div>
             </td>
             <td><span class="badge bg-light text-secondary rounded-pill px-3">{{ prod.category }}</span></td>
-            <td class="fw-bold text-primary">{{ prod.sellPrice | currency }}</td>
+            <td class="fw-bold text-primary">${{ prod.sellPrice | number:'1.2-2' }}</td>
+            <td class="small">{{ formatBs(prod.priceBs) }}</td>
+            <td class="small">{{ formatCop(prod.priceCop) }}</td>
             <td class="text-center">
               <span class="fs-4" [title]="prod.requiresKitchen ? 'Va a cocina' : 'Entrega directa'">
                 {{ prod.requiresKitchen ? '👨‍🍳' : '🥤' }}
@@ -103,18 +113,33 @@
                 <label class="form-label small fw-bold">Descripción</label>
                 <textarea class="form-control" [(ngModel)]="form.description" name="description" rows="2"></textarea>
               </div>
-              <div class="row">
-                <div class="col-6 mb-3">
-                  <label class="form-label small fw-bold">Precio ($)</label>
-                  <input type="number" class="form-control" [(ngModel)]="form.sellPrice" name="sellPrice" required>
+
+              <!-- 3 Precios -->
+              <div class="mb-3 p-3 border rounded-3 bg-white">
+                <h6 class="text-uppercase x-small fw-bold text-muted mb-2">💰 Precios</h6>
+                <div class="row g-2">
+                  <div class="col-4">
+                    <label class="form-label x-small fw-bold">💵 USD</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" [(ngModel)]="form.sellPrice" name="sellPrice" required>
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label x-small fw-bold">🇻🇪 Bs</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" [(ngModel)]="form.priceBs" name="priceBs">
+                  </div>
+                  <div class="col-4">
+                    <label class="form-label x-small fw-bold">🇨🇴 COP</label>
+                    <input type="number" step="1000" class="form-control form-control-sm" [(ngModel)]="form.priceCop" name="priceCop">
+                  </div>
                 </div>
-                <div class="col-6 mb-3">
-                  <label class="form-label small fw-bold">Categoría</label>
-                  <select class="form-select" [(ngModel)]="form.category" name="category" required>
-                    <option [value]="undefined" disabled>Seleccionar...</option>
-                    <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
-                  </select>
-                </div>
+                <div class="x-small text-muted mt-1">Editables manualmente. Usa "Recalcular" para actualizar todos desde las tasas.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-bold">Categoría</label>
+                <select class="form-select" [(ngModel)]="form.category" name="category" required>
+                  <option [value]="undefined" disabled>Seleccionar...</option>
+                  <option *ngFor="let cat of categorias" [value]="cat">{{ cat }}</option>
+                </select>
               </div>
               <div class="mb-3">
                 <label class="form-label small fw-bold">Imagen URL</label>

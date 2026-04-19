@@ -798,3 +798,47 @@ $red:          #c0392b;
 
   &:hover { background: rgba(255,255,255,0.28); }
 }
+
+/* ════════════════════════
+   GLOBAL AGENT TOGGLE
+════════════════════════ */
+.global-agent-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba($wa-green, 0.12);
+  border: 1px solid rgba($wa-green, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: $wa-dark;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background: rgba($wa-green, 0.22); }
+  &:disabled { opacity: 0.5; cursor: wait; }
+
+  &.agent-off {
+    background: rgba($red, 0.1);
+    border-color: rgba($red, 0.3);
+    color: $red;
+
+    &:hover:not(:disabled) { background: rgba($red, 0.2); }
+  }
+}
+
+.global-agent-label {
+  letter-spacing: 0.5px;
+}
+
+.agent-off-banner {
+  padding: 8px 14px;
+  background: #fef2f2;
+  color: $red;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 1px solid #fca5a5;
+  animation: fadeSlideIn 0.2s ease;
+}

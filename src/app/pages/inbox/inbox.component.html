@@ -15,8 +15,22 @@
         </div>
         <h1>WhatsApp Inbox</h1>
       </div>
-      <span class="unread-badge" *ngIf="totalUnread > 0">{{ totalUnread }}</span>
+      <div class="d-flex align-items-center gap-2">
+        <!-- Global Agent Toggle -->
+        <button class="global-agent-btn" [class.agent-off]="!agentEnabled"
+                (click)="toggleGlobalAgent()" [disabled]="togglingAgent"
+                [title]="agentEnabled ? 'Valentina activa (click para desactivar)' : 'Valentina desactivada (click para activar)'">
+          <span>{{ agentEnabled ? '🤖' : '👤' }}</span>
+          <span class="global-agent-label">{{ agentEnabled ? 'IA ON' : 'IA OFF' }}</span>
+        </button>
+        <span class="unread-badge" *ngIf="totalUnread > 0">{{ totalUnread }}</span>
+      </div>
     </header>
+
+    <!-- Agent OFF Warning Banner -->
+    <div class="agent-off-banner" *ngIf="!agentEnabled">
+      ⚠️ Valentina desactivada — Todas las conversaciones son manuales
+    </div>
 
     <!-- Search bar (visual, no funcional aún) -->
     <div class="search-bar">
