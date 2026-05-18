@@ -6,6 +6,7 @@ import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { BanksService, BankAccount } from '../../services/banks.service';
 
 interface Ingredient {
   _id: string;
@@ -53,17 +54,24 @@ export class ComprasComponent implements OnInit {
   mostrarDetalle = false;
   compraDetalle: PurchaseOrder | null = null;
 
+  // Bancos
+  bankAccounts: BankAccount[] = [];
+
   constructor(
     private purchasesService: PurchasesService,
     private alertService: AlertService,
     public authService: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private banksService: BanksService,
   ) {}
 
   ngOnInit(): void {
     this.setMesActual();
     this.cargarProveedores();
     this.cargarIngredientes();
+    this.banksService.getAccounts().subscribe({
+      next: (data) => this.bankAccounts = data.filter(a => a.isActive)
+    });
   }
 
   // ── Carga de datos ──────────────────────────────────────────────────
@@ -358,7 +366,8 @@ export class ComprasComponent implements OnInit {
       date: hoy,
       items: [{ ingredientId: '', ingredientName: '', quantity: 0, unitMeasure: '', unitCost: 0, subtotal: 0 }],
       total: 0,
-      notes: ''
+      notes: '',
+      bankAccountId: '',
     };
   }
 }

@@ -102,8 +102,10 @@ export class PayrollService {
     return this.http.delete<PayrollRecord>(`${this.API}/${id}`);
   }
 
-  markAsPaid(id: string, paymentMethod: string): Observable<PayrollRecord> {
-    return this.http.post<PayrollRecord>(`${this.API}/${id}/pay`, { paymentMethod });
+  markAsPaid(id: string, paymentMethod: string, bankAccountId?: string): Observable<PayrollRecord> {
+    const body: any = { paymentMethod };
+    if (bankAccountId) body.bankAccountId = bankAccountId;
+    return this.http.post<PayrollRecord>(`${this.API}/${id}/pay`, body);
   }
 
   generateBulk(periodStart: string, periodEnd: string): Observable<PayrollRecord[]> {

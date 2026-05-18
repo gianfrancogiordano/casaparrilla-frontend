@@ -416,6 +416,19 @@
             </div>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Descontar de Banco (opcional)</label>
+            <select class="form-select rounded-3" name="bankAccountId" [(ngModel)]="formNomina.bankAccountId">
+              <option value="">— No descontar —</option>
+              <option *ngFor="let bank of bankAccounts" [value]="bank._id">
+                {{ bank.icon || '🏦' }} {{ bank.name }} ({{ bank.currency }}) — {{ bank.balance | currency:'USD':'symbol':'1.2-2' }}
+              </option>
+            </select>
+            <div class="form-text small text-muted">
+              🏦 Al marcar como pagada, se registrará un egreso en la cuenta seleccionada.
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold"
                   [disabled]="!formNomina.employeeId || formNomina.netPay <= 0">
             Crear Registro de Nómina
@@ -478,6 +491,18 @@
             <option value="Transferencia">🏦 Transferencia</option>
             <option value="Pago Movil">📲 Pago Móvil</option>
           </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold">Descontar de Banco (opcional)</label>
+          <select class="form-select rounded-3" [(ngModel)]="bankAccountIdPago">
+            <option value="">— No descontar —</option>
+            <option *ngFor="let bank of bankAccounts" [value]="bank._id">
+              {{ bank.icon || '🏦' }} {{ bank.name }} ({{ bank.currency }}) — {{ bank.balance | currency:'USD':'symbol':'1.2-2' }}
+            </option>
+          </select>
+          <div class="form-text small text-muted">
+            🏦 Se registrará un egreso automático en la cuenta seleccionada.
+          </div>
         </div>
         <button class="btn btn-success w-100 py-3 rounded-3 fw-bold" (click)="confirmarPago()">
           ✅ Confirmar Pago

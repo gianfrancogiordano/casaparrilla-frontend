@@ -1,0 +1,64 @@
+// ─── Métricas ─────────────────────────────────────────────────────
+.metric-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.08) !important; }
+}
+.metric-icon { font-size: 1.5rem; }
+.metric-value { font-size: 1.3rem; }
+.metric-red    { border-left: 4px solid #e74c3c; }
+.metric-orange { border-left: 4px solid #f39c12; }
+.metric-blue   { border-left: 4px solid #3498db; }
+.metric-green  { border-left: 4px solid #27ae60; }
+.delta-badge {
+  font-size: .65rem; font-weight: 700; letter-spacing: .3px;
+  background: rgba(0,0,0,.05); color: #555;
+}
+
+// ─── Account Cards ────────────────────────────────────────────────
+.account-card {
+  transition: transform .15s ease, box-shadow .15s ease;
+  &:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,.1) !important; }
+}
+.border-usd  { border-left: 4px solid #27ae60; }
+.border-bs   { border-left: 4px solid #3498db; }
+.border-cop  { border-left: 4px solid #e67e22; }
+.border-usdt { border-left: 4px solid #f1c40f; }
+
+// ─── Movimientos ──────────────────────────────────────────────────
+.mov-ingreso {
+  background: rgba(46, 204, 113, .12);
+  color: #27ae60;
+  font-weight: 600;
+}
+.mov-egreso {
+  background: rgba(231, 76, 60, .12);
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.cat-badge {
+  background: rgba(0,0,0,.05);
+  color: #555;
+}
+
+// Info badges
+.bg-warning-soft { background: rgba(241,196,15,.12); }
+
+// ─── Tabla ────────────────────────────────────────────────────────
+.custom-table {
+  th { font-size: .72rem; letter-spacing: .5px; border: 0; }
+  td { border-color: #f3f4f6; font-size: .88rem; }
+}
+.hover-row {
+  transition: background .15s;
+  &:hover { background: #f8f9fa; }
+}
+
+// ─── Animación ────────────────────────────────────────────────────
+.animate-fade-in {
+  animation: fadeIn .35s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

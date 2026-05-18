@@ -287,6 +287,18 @@
             <textarea class="form-control rounded-3" name="notes" [(ngModel)]="formVariable.notes"
                       rows="2" placeholder="Ej: Pagado a CORPOELEC"></textarea>
           </div>
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Descontar de Banco (opcional)</label>
+            <select class="form-select rounded-3" name="bankAccountId" [(ngModel)]="formVariable.bankAccountId">
+              <option value="">— No descontar —</option>
+              <option *ngFor="let bank of bankAccounts" [value]="bank._id">
+                {{ bank.icon || '🏦' }} {{ bank.name }} ({{ bank.currency }}) — Saldo: {{ bank.balance | currency:'USD':'symbol':'1.2-2' }}
+              </option>
+            </select>
+            <div class="form-text small text-muted">
+              🏦 Se registrará un egreso automático en la cuenta seleccionada.
+            </div>
+          </div>
           <div class="mt-4">
             <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold">
               {{ editandoVariable ? 'Guardar Cambios' : 'Registrar Gasto' }}

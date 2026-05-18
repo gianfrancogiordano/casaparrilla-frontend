@@ -12,6 +12,7 @@ export interface Expense {
   userId?: any;
   receiptUrl?: string;
   notes?: string;
+  bankAccountId?: string;
   createdAt?: string;
 }
 

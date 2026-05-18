@@ -107,6 +107,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/nomina',
       roles: ['Administrador'],
     },
+    {
+      label: 'Bancos',
+      icon: '🏦',
+      route: '/bancos',
+      roles: ['Administrador'],
+    },
     // ── Configuración (solo Admin) ─────────────────────────────────────────
     {
       label: 'Usuarios',
@@ -185,7 +191,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /** Items de finanzas visibles */
   get finanzasItems(): NavItem[] {
-    const finanzas = ['Caja', 'Gastos', 'Reportes', 'Compras', 'Nómina'];
+    const finanzas = ['Caja', 'Gastos', 'Reportes', 'Compras', 'Nómina', 'Bancos'];
     return this.menuItems.filter((i) => finanzas.includes(i.label));
   }
 

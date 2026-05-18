@@ -5,6 +5,7 @@ import { ExpensesService, Expense, ExpenseSummary } from '../../services/expense
 import { FixedExpensesService, FixedExpense } from '../../services/fixed-expenses.service';
 import { AlertService } from '../../services/alert.service';
 import { AuthService } from '../../services/auth.service';
+import { BanksService, BankAccount } from '../../services/banks.service';
 
 @Component({
   selector: 'app-gastos',
@@ -41,11 +42,15 @@ export class GastosComponent implements OnInit {
   editandoFijo     = false;
   formFijo: Partial<FixedExpense> = this.getEmptyFormFijo();
 
+  // ── Bancos ─────────────────────────────────────────────────────────
+  bankAccounts: BankAccount[] = [];
+
   constructor(
     private expensesService: ExpensesService,
     public  fixedExpensesService: FixedExpensesService,
     private alertService: AlertService,
-    public  authService: AuthService
+    public  authService: AuthService,
+    private banksService: BanksService,
   ) {
     this.categorias = this.expensesService.getCategories();
   }
@@ -53,6 +58,7 @@ export class GastosComponent implements OnInit {
   ngOnInit(): void {
     this.setMesActual();
     this.cargarFijos();
+    this.cargarBancos();
   }
 
   // ── Tab ────────────────────────────────────────────────────────────
@@ -266,10 +272,16 @@ export class GastosComponent implements OnInit {
       timeZone: 'America/Caracas',
       year: 'numeric', month: '2-digit', day: '2-digit'
     }).format(new Date());
-    return { description: '', amount: 0, category: 'Otros', date: hoy, notes: '' };
+    return { description: '', amount: 0, category: 'Otros', date: hoy, notes: '', bankAccountId: '' };
   }
 
   private getEmptyFormFijo(): Partial<FixedExpense> {
     return { name: '', amount: 0, category: 'Otros', isActive: true, notes: '' };
+  }
+
+  cargarBancos(): void {
+    this.banksService.getAccounts().subscribe({
+      next: (data) => this.bankAccounts = data.filter(a => a.isActive)
+    });
   }
 }

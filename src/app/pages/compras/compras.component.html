@@ -384,6 +384,19 @@
                       rows="2" placeholder="Observaciones de la compra"></textarea>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">Descontar de Banco (opcional)</label>
+            <select class="form-select rounded-3" name="bankAccountId" [(ngModel)]="formCompra.bankAccountId">
+              <option value="">— No descontar —</option>
+              <option *ngFor="let bank of bankAccounts" [value]="bank._id">
+                {{ bank.icon || '🏦' }} {{ bank.name }} ({{ bank.currency }}) — Saldo: {{ bank.balance | currency:'USD':'symbol':'1.2-2' }}
+              </option>
+            </select>
+            <div class="form-text small text-muted">
+              🏦 Al confirmar la compra, se registrará un egreso en la cuenta seleccionada.
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold"
                   [disabled]="!formCompra.supplierId || formCompra.items.length === 0 || formCompra.total <= 0">
             Crear Orden de Compra

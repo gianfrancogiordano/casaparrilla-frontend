@@ -35,6 +35,7 @@ export interface PurchaseOrder {
   status: 'Pendiente' | 'Confirmada' | 'Cancelada';
   createdBy?: any;
   notes?: string;
+  bankAccountId?: string;
   createdAt?: string;
 }
 

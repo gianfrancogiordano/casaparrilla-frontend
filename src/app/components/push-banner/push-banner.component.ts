@@ -8,7 +8,7 @@ import { PushNotificationsService } from '../../services/push-notifications.serv
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="push-banner" *ngIf="showBanner" [@slideDown]>
+    <div class="push-banner" *ngIf="showBanner">
       <div class="push-banner__icon">🔔</div>
       <div class="push-banner__text">
         <strong>Activa las notificaciones</strong>

@@ -47,6 +47,7 @@ export const routes: Routes = [
       { path: 'reportes', component: ReportesComponent },
       { path: 'compras', component: ComprasComponent },
       { path: 'nomina', component: NominaComponent },
+      { path: 'bancos', loadComponent: () => import('./pages/bancos/bancos.component').then(m => m.BancosComponent) },
       { path: 'usuarios', component: UsuariosComponent },
       { path: 'clientes', component: ClientesComponent },
       { path: 'test-printer', component: TestPrinterComponent },

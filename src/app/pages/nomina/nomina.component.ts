@@ -3,6 +3,7 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PayrollService, Employee, PayrollRecord, PayrollSummary } from '../../services/payroll.service';
 import { AlertService } from '../../services/alert.service';
+import { BanksService, BankAccount } from '../../services/banks.service';
 
 @Component({
   selector: 'app-nomina',
@@ -40,19 +41,27 @@ export class NominaComponent implements OnInit {
   mostrarModalPagar = false;
   nominaPagar: PayrollRecord | null = null;
   metodoPago = 'Efectivo';
+  bankAccountIdPago = '';
 
   // Modal Detalle
   mostrarDetalle = false;
   nominaDetalle: PayrollRecord | null = null;
 
+  // Bancos
+  bankAccounts: BankAccount[] = [];
+
   constructor(
     private payrollService: PayrollService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private banksService: BanksService,
   ) {}
 
   ngOnInit(): void {
     this.setMesActual();
     this.cargarEmpleados();
+    this.banksService.getAccounts().subscribe({
+      next: (data) => this.bankAccounts = data.filter(a => a.isActive)
+    });
   }
 
   // ── Carga ───────────────────────────────────────────────────────────
@@ -226,6 +235,7 @@ export class NominaComponent implements OnInit {
   abrirModalPagar(nomina: PayrollRecord): void {
     this.nominaPagar = nomina;
     this.metodoPago = 'Efectivo';
+    this.bankAccountIdPago = '';
     this.mostrarModalPagar = true;
   }
 
@@ -233,7 +243,7 @@ export class NominaComponent implements OnInit {
 
   confirmarPago(): void {
     if (!this.nominaPagar) return;
-    this.payrollService.markAsPaid(this.nominaPagar._id, this.metodoPago).subscribe({
+    this.payrollService.markAsPaid(this.nominaPagar._id, this.metodoPago, this.bankAccountIdPago || undefined).subscribe({
       next: () => {
         this.alertService.success('💵 Nómina marcada como pagada');
         this.cargarNominas();
@@ -294,7 +304,8 @@ export class NominaComponent implements OnInit {
     const month = String(hoy.getMonth() + 1).padStart(2, '0');
     return {
       employeeId: '', periodStart: `${year}-${month}-01`, periodEnd: `${year}-${month}-15`,
-      baseSalary: 0, bonuses: [], deductions: [], totalBonuses: 0, totalDeductions: 0, netPay: 0, notes: ''
+      baseSalary: 0, bonuses: [], deductions: [], totalBonuses: 0, totalDeductions: 0, netPay: 0, notes: '',
+      bankAccountId: ''
     };
   }
 }
